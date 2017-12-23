@@ -1,0 +1,36 @@
+#!/user/bin/env node
+const { resolve, join } = require('path')
+const { existsSync } = require('fs')
+const parseArgs = require('minimist')
+const build = require('../build/build')
+
+const argv = parseArgs(process.argv.slice(2), {
+  alise: {
+    h: 'help'
+  },
+  boolean: ['h']
+})
+
+if (argv.help) {
+  console.log(`
+    Description
+      Compiles the application for production deployment
+    Usage
+      $ nenv build <dir>
+    <dir> represents where the compile dist folder shoule go.
+    If no directory is provided, the dist folder will be created in the current directoty.
+  `)
+  process.exit(0)
+}
+
+const dir = resolve(argv._[0] || '.')
+
+if (!existsSync(dir)) {
+  console.log('dd')
+}
+
+build(dir)
+.catch((err) => {
+  console.error(err)
+  process.exit(1)
+})

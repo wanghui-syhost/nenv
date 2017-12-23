@@ -1,0 +1,42 @@
+#!/user/bin/env node
+
+const { resolve, join } = require('path')
+const { existsSync, readdirSync } = require('fs')
+const parseArgs = require('minimist')
+
+const { printAndExit } = require('../lib/utils')
+
+const argv = parseArgs(process.argv.slice(2), {
+  alise: {
+    h: 'help'
+  },
+  boolean: ['h']
+})
+
+if (argv.help) {
+  console.log(`
+    Description
+      Init a nenv project
+    Usage
+      nenv init <dir>
+    <dir> represents where the compile dist folder shoule go.
+    If no directory is provided, the dist folder will be created in the current directoty.
+  `)
+  process.exit(0)
+}
+
+const dir = resolve(argv._[0] || '.')
+
+if (!existsSync(dir)) {
+  printAndExit(`> No such directory exists as the project root: ${dir}`)
+}
+
+// (readdirSync(dir))
+if (readdirSync(dir).length !== 0) {
+  printAndExit(`> project root: ${dir} is not an empty directory`)
+  copyFiles(join(__dirname, '../template/static'), dir)
+}
+
+function copyFiles (src, dist) {
+
+}
