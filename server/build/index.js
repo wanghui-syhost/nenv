@@ -8,7 +8,7 @@ const md5File = require('md5-file/promise')
 module.exports = async function build (dir, conf = null) {
   const buildId = Math.random()
   const tempDir = tmpdir()
-  const buildDir = join(dir, 'hshs')
+  const buildDir = join(tempDir, 'hshs')
 
   try {
     await fs.access(tempDir, fs.constants.W_OK)

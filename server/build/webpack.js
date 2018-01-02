@@ -32,21 +32,21 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
 
   const entry = async () => {
     const entries = {
-      'main.js': [
+      'app': [
         ...defaultEntries,
         ...config.clientBootstrap || [],
-        //mainJS
+        mainJS
       ]
     }
 
     const pages = await glob(config.pagesGlobPattern, { cwd: dir })
     // const
-    for (const p of defaultPages) {
-      const entryName = join('bundles', 'pages', p)
-      if (!entries[entryName]) {
-        entries[entryName] = [join(nenvPagesDir, p)]
-      }
-    }
+    // for (const p of defaultPages) {
+    //   const entryName = join('bundles', 'pages', p)
+    //   if (!entries[entryName]) {
+    //     entries[entryName] = [join(nenvPagesDir, p)]
+    //   }
+    // }
     console.log(entries)
     return entries
   }
@@ -55,8 +55,20 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     new webpack.IgnorePlugin(/(precomputed)/, /node_modules.+(elliptic)/),
     new webpack.LoaderOptionsPlugin({
       options: {
-        context: dir
-
+        context: dir,
+        customInterpolateName (url, name, opts) {
+          return interpolateNames.get(this.rosourcePath) || url
+        }
+      }
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'commons',
+      filename: 'commons.js',
+      minChunks (module, count) {
+        if (totalPages <= 2) {
+          return count >= totalPages
+        }
+        return count >= totalPages * 0.5
       }
     }),
     new webpack.optimize.CommonsChunkPlugin({
@@ -66,18 +78,18 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(dev ? 'development' : 'production')
     })
-        // new Dy
+    // new Dy
   ]
 
   if (dev) {
     plugins.push(
-            new webpack.HotModuleReplacementPlugin(),
-            new webpack.NoEmitOnErrorsPlugin(),
-            new HtmlWebpckPlugin({
-              filename: 'index.html',
-              template: 'index.html',
-              inject: true
-            })
+      new webpack.HotModuleReplacementPlugin(),
+      new webpack.NoEmitOnErrorsPlugin(),
+      new HtmlWebpckPlugin({
+        filename: 'index.html',
+        template: 'index.html',
+        inject: true
+      })
     )
     if (!quiet) {
       plugins.push(new FriendlyErrorsWebpackPlugin())
@@ -86,12 +98,23 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     //   HtmlWebpckPlugin
     // )
   } else {
+    plugins.push(new HtmlWebpckPlugin({
+      filename: 'index.html',
+      template: 'index.html',
+      inject: true,
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeAttributeQuotes: true
+      },
+      chunksSortMode: 'dependency'
+    }))
     plugins.push(new webpack.IgnorePlugin())
     plugins.push(
-            new CombineAssetsPlugin({
-              input: ['manifest.js', 'commons.js', 'main.js'],
-              output: 'app.js'
-            }),
+            // new CombineAssetsPlugin({
+            //   input: ['manifest.js', 'commons.js', 'main.js'],
+            //   output: 'app.js'
+            // }),
             new UglifyJSPlugin({
               parallel: true,
               sourceMap: false,
@@ -114,21 +137,32 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
   }] : [])
     .concat([
       {
+        test: /\.json$/,
+        loader: 'json-loader'
+      },
+      {
         test: /\.vue$/,
         loader: 'vue-loader',
         options: {}
       },
       {
         test: /\.js$/,
-        loader: 'babel-loader'
-            // include:
+        loader: 'babel-loader',
+        include: [dir],
+        exclude (str) {
+          // console.log(str)
+          return /node_modules/.test(str)
+        },
+        options: {
+          //
+        }
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
         loader: 'url-loader',
         options: {
           limit: 10000
-                // name
+          // name
         }
       },
       {
@@ -136,7 +170,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         loader: 'url-loader',
         options: {
           limit: 10000
-                // name
+          // name
         }
       }
     ])
@@ -146,16 +180,19 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     entry,
     output: {
       path: buildDir ? join(buildDir, '.nenv') : join(dir, config.distDir),
-      filename: '[name]',
-      libraryTarget: 'commonjs2',
+      filename: '[name].js',
+      // libraryTarget: 'commonjs2',
       // publicPath:
       strictModuleExceptionHandling: true,
+      // devtoolModuleFilenameTemplate ({ resourcePath }) {
+      //   //const hash = cre
+      // },
       chunkFilename: '[name]'
     },
     resolve: {
       extensions: ['.js', '.vue', '.json'],
       alias: {
-        'vue$': 'vue/dist/vue.esm.js  '
+        vue$: 'vue/dist/vue.esm.js  '
       },
       modules: [
         nenvNodeModulesDir,

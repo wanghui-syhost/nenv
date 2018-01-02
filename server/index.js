@@ -28,8 +28,8 @@ module.exports = class Server {
     return new HotReloader(dir, options)
   }
 
-  handleRequest (req, res) {
-    return this.run(req, res)
+  handleRequest (req, res, next) {
+    return this.run(req, res, next)
       .catch((err) => {
         if (!this.quiet) console.error(err)
         res.statusCode = 500
@@ -62,8 +62,16 @@ module.exports = class Server {
     }
   }
 
+  defineRoutes () {
+    const routes = {
+
+    }
+    return routes
+  }
+
   async start (port, hostname) {
     await this.prepare()
+    this.app.use(this.getRequestHandler())
     this.http = http.createServer(this.app)
     await new Promise((resolve, reject) => {
       this.http.on('error', reject)

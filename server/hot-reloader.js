@@ -78,29 +78,33 @@ module.exports = class HotReloader {
   }
 
   async prepareBuildTools (compiler) {
-    compiler.plugin('after-emit', (compilation, callback) => {
-      const { assets } = compilation
+    // compiler.plugin('after-emit', (compilation, callback) => {
+    //   const { assets } = compilation
 
-      if (this.prevAssets) {
-        for (const f of Object.keys(assets)) {
-          deleteCache(assets[f].existsAt)
-        }
+    //   if (this.prevAssets) {
+    //     for (const f of Object.keys(assets)) {
+    //       deleteCache(assets[f].existsAt)
+    //     }
 
-        for (const f of Object.keys(this.prevAssets)) {
-          if (!assets[f]) {
-            deleteCache(this.prevAssets[f].existsAt)
-          }
-        }
-      }
+    //     for (const f of Object.keys(this.prevAssets)) {
+    //       if (!assets[f]) {
+    //         deleteCache(this.prevAssets[f].existsAt)
+    //       }
+    //     }
+    //   }
 
-      this.prevAssets = assets
-      callback()
-    })
+    //   this.prevAssets = assets
+    //   callback()
+    // })
 
-    compiler.plugin('done', (stats) => {
-      const { compilation } = new Set(
-            // compilation.chunks
-        )
+    // compiler.plugin('done', (stats) => {
+    //   const { compilation } = new Set(
+    //         // compilation.chunks
+    //     )
+    // })
+
+    compiler.plugin('compilation', function (compilation) {
+      // compilation.plugin('html-webpack-plugin-after-emit', )
     })
 
     const ignored = [
