@@ -2,7 +2,8 @@
 const { resolve, join } = require('path')
 const { existsSync } = require('fs')
 const parseArgs = require('minimist')
-const build = require('../build/build')
+const build = require('../server/build')
+const { printAndExit } = require('../lib/utils')
 
 const argv = parseArgs(process.argv.slice(2), {
   alise: {
@@ -26,7 +27,15 @@ if (argv.help) {
 const dir = resolve(argv._[0] || '.')
 
 if (!existsSync(dir)) {
-  console.log('dd')
+  printAndExit(`> No such directory exists as the project root: ${dir}`)
+}
+
+if (!existsSync(join(dir, 'pages'))) {
+  if (existsSync(join(dir, '..', 'pages'))) {
+    printAndExit('> No `pages` directory found. Did you mean to run `nenv` in parent (`../`) directory')
+  }
+
+  printAndExit('> Clouldn\'t find a `pages` directory. Please create one under the project root')
 }
 
 build(dir)
