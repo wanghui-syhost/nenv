@@ -11,7 +11,8 @@ const defaultConfig = {
   assetPrefix: '',
   configOrigin: 'default',
   useFileSystemPublicRoutes: true,
-  pagesGlobPattern: 'pages/**/*.+(js|jsx)'
+  layoutsGlobPattern: 'layouts/**/*.+(js|vue)',
+  pagesGlobPattern: 'pages/**/*.nenv.+(js|vue)'
 }
 
 module.exports = function getConfig (dir, customConfig) {

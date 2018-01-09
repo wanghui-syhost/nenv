@@ -1,7 +1,9 @@
-const { resolve, join, sep } = require('path')
+const path = require('path')
+const { resolve, join, sep } = path
 const fs = require('fs')
 const express = require('express')
 const http = require('http')
+const proxyMiddleware = require('http-proxy-middleware')
 const getConfig = require('./config')
 const { STATUS_CODES } = http
 
@@ -17,6 +19,7 @@ module.exports = class Server {
     this.dev = dev
         // this.router = new
     this.hotReloader = this.getHotReloader(this.dir, { quiet, conf })
+    this.proxy = this.getProxy(this.dir, {quiet, conf})
     this.http = null
     this.config = getConfig(this.dir, conf)
     this.dist = this.config.distDir
@@ -39,6 +42,24 @@ module.exports = class Server {
 
   getRequestHandler () {
     return this.handleRequest.bind(this)
+  }
+
+  getProxy (dir, { quiet, conf } = { }) {
+    let fn = (req, res, next) => next()
+    try {
+      const proxyTable = require(join(dir, 'proxy'))
+      console.log(proxyTable)
+      Object.keys(proxyTable).forEach((context) => {
+        let options = proxyTable[context]
+        if (typeof options === 'string') {
+          options = { target: options }
+        }
+        fn = proxyMiddleware(options.filter || context, options)
+      })
+      return fn
+    } catch (e) {
+      return fn
+    }
   }
 
   async prepare () {
@@ -71,8 +92,15 @@ module.exports = class Server {
 
   async start (port, hostname) {
     await this.prepare()
+
+    this.app.use(path.posix.join(this.dir, 'static'), express.static('./static'))
+
+    this.app.use(this.proxy)
+
     this.app.use(this.getRequestHandler())
+
     this.http = http.createServer(this.app)
+
     await new Promise((resolve, reject) => {
       this.http.on('error', reject)
       this.http.on('listening', () => resolve())
@@ -91,6 +119,4 @@ module.exports = class Server {
     const buildId = fs.readFileSync(buildIdPath, 'utf8')
     return buildId.trim()
   }
-
-  // async run (req, res)
 }

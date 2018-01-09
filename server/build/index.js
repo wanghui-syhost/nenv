@@ -1,14 +1,16 @@
 const { tmpdir } = require('os')
 const { join } = require('path')
 const fs = require('mz/fs')
+const uuid = require('uuid')
+const del = require('del')
 const webpack = require('./webpack')
 const replaceCurrentBuild = require('./replace')
 const md5File = require('md5-file/promise')
 
 module.exports = async function build (dir, conf = null) {
-  const buildId = Math.random()
+  const buildId = uuid.v4()
   const tempDir = tmpdir()
-  const buildDir = join(tempDir, 'hshs')
+  const buildDir = join(tempDir, uuid.v4())
 
   try {
     await fs.access(tempDir, fs.constants.W_OK)
@@ -28,6 +30,8 @@ module.exports = async function build (dir, conf = null) {
   }
 
   await replaceCurrentBuild(dir, buildDir)
+
+  del(buildDir, { force: true })
 }
 
 function runCompiler (compiler) {
@@ -41,7 +45,7 @@ function runCompiler (compiler) {
         const error = new Error(jsonStats.errors[0])
         error.errors = jsonStats.errors
         error.warnings = jsonStats.warnings
-        return reject(err)
+        return reject(error)
       }
 
       resolve(jsonStats)

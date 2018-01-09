@@ -1,6 +1,6 @@
 import initNenv, * as nenv from './'
 
-window.nenv = nenv
+// window.nenv = nenv
 
 initNenv()
     .catch((err) => {

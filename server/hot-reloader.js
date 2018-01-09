@@ -3,6 +3,7 @@ const WebpackDevMiddleware = require('webpack-dev-middleware')
 const WebpackHotMiddleware = require('webpack-hot-middleware')
 const webpack = require('./build/webpack')
 const getConfig = require('./config')
+const { IS_BUNDLED_PAGE } = require('./utils')
 
 module.exports = class HotReloader {
   constructor (dir, { quiet, conf } = {}) {
@@ -78,37 +79,81 @@ module.exports = class HotReloader {
   }
 
   async prepareBuildTools (compiler) {
-    // compiler.plugin('after-emit', (compilation, callback) => {
-    //   const { assets } = compilation
+    compiler.plugin('after-emit', (compilation, callback) => {
+      const { assets } = compilation
 
-    //   if (this.prevAssets) {
-    //     for (const f of Object.keys(assets)) {
-    //       deleteCache(assets[f].existsAt)
-    //     }
+      if (this.prevAssets) {
+        for (const f of Object.keys(assets)) {
+          deleteCache(assets[f].existsAt)
+        }
 
-    //     for (const f of Object.keys(this.prevAssets)) {
-    //       if (!assets[f]) {
-    //         deleteCache(this.prevAssets[f].existsAt)
-    //       }
-    //     }
-    //   }
+        for (const f of Object.keys(this.prevAssets)) {
+          if (!assets[f]) {
+            deleteCache(this.prevAssets[f].existsAt)
+          }
+        }
+      }
+      this.prevAssets = assets
 
-    //   this.prevAssets = assets
-    //   callback()
-    // })
+      callback()
+    })
 
-    // compiler.plugin('done', (stats) => {
-    //   const { compilation } = new Set(
-    //         // compilation.chunks
-    //     )
-    // })
+    compiler.plugin('done', (stats) => {
+      const { compilation } = stats
+      const chunkNames = new Set(
+          compilation.chunks
+              .map((c) => c.name)
+              .filter(name => IS_BUNDLED_PAGE.test(name))
+        )
 
-    compiler.plugin('compilation', function (compilation) {
-      // compilation.plugin('html-webpack-plugin-after-emit', )
+      const failedChunkNames = new Set(compilation.errors
+        .map((e) => e.module.reasons)
+        .reduce((a, b) => a.concat(b), [])
+        .map((r) => r.module.chunks)
+        .reduce((a, b) => a.concat(b), [])
+        .map((c) => c.name))
+
+      const chunkHashes = new Map(
+        compilation.chunks
+          .filter(c => IS_BUNDLED_PAGE.test(c.name))
+          .map((c) => [c.name, c.hash])
+      )
+
+      if (this.initialized) {
+        const added = diff(chunkNames, this.prevChunkNames)
+        const removed = diff(this.prevChunkNames, chunkNames)
+        const succeeded = diff(this.prevFailedChunkNames, failedChunkNames)
+
+        const failed = failedChunkNames
+
+        const rootDir = join('bundles', 'pages')
+
+        for (const n of new Set([...added, ...removed, ...failed, ...succeeded])) {
+          const route = toRoute(relative(rootDir, n))
+          this.send('reload', route)
+        }
+
+        for (const [n, hash] of chunkHashes) {
+          if (!this.prevChunkHashes.has(n)) continue
+          if (this.prevChunkHashes.get(n) === hash) continue
+
+          const route = toRoute(relative(rootDir, n))
+
+          this.send('change', route)
+        }
+      }
+
+      this.initialized = true
+      this.stats = stats
+      this.compilationErrors = null
+      this.prevChunkNames = chunkNames
+      this.prevFailedChunkNames = failedChunkNames
+      this.prevChunkHashes = chunkHashes
     })
 
     const ignored = [
-      /node_modules/
+      /(^|[/\\])\../ // .dotfiles
+     // /node_modules/
     ]
 
     let webpackDevMiddlewareConfig = {
@@ -151,4 +196,13 @@ module.exports = class HotReloader {
 
 function deleteCache (path) {
   delete require.cache[path]
+}
+
+function diff (a, b) {
+  return new Set([...a].filter((v) => !b.has(v)))
+}
+
+function toRoute (file) {
+  const f = sep === '\\' ? file.replace(/\\g/, '/') : file
+  return ('/' + f).replace(/(\/index)?\.js$/, '') || '/'
 }

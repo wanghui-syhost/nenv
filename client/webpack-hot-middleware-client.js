@@ -1,9 +1,21 @@
 /* eslint-disable */
 require('eventsource-polyfill')
-var hotClient = require('webpack-hot-middleware/client?noInfo=true&reload=true')
+var webpackHotMiddlewareClient = require('webpack-hot-middleware/client?noInfo=true&reload=true')
 
-hotClient.subscribe(function (event) {
-  if (event.action === 'reload') {
-    window.location.reload()
+export default () => {
+  const handlers = {
+    reload (route) {
+      window.location.reload()
+    }
   }
-})
+
+  webpackHotMiddlewareClient.subscribe(function (event) {
+    const fn = handlers[event.action]
+    if (fn) {
+      const data = event.data || []
+      fn (...data)
+    } else {
+      throw new Error('Unexpected action ' + event.action)
+    }
+  })
+}

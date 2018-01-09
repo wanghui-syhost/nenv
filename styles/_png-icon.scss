@@ -1,0 +1,26 @@
+i.png-icon {
+    display: inline-block;
+    position: relative;
+    
+    width: 16px;
+    height: 16px;
+
+    &.small {
+        width: 14px;
+        height: 14px;
+    }
+
+    &.larger {
+        width: 20px;
+        height: 20px;
+    }
+
+    &:after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 100%;
+        background-repeat: no-repeat;
+        background-size: contain;
+    }
+}
