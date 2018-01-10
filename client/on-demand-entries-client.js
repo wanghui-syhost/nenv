@@ -1,11 +1,28 @@
-export default () => {
+import fetch from 'unfetch'
+import router from '../lib/router'
+export default function h () {
+  router.afterEach((from, to) => {
+    // ping()
+    return true
+  })
+
   async function ping () {
     try {
-      const url = `/_nenv/on-demand-entries-ping?page=''`
+      debugger
+      const r = router.app.$router
+      const url = `/_nenv/on-demand-entries-ping?page=${r.path}`
       const res = await fetch(url, {
         credentials: 'same-origin'
       })
-      // const payload = await res.json()
+      const payload = await res.json()
+      if (payload.invalid) {
+        const pageRes = await fetch(r.path, {
+          credentials: 'same-origin'
+        })
+        if (pageRes.status === 200) {
+          location.reload()
+        }
+      }
     } catch (err) {
       console.error(`Error with on-demand-entries-ping: ${err.message}`)
     }
@@ -36,3 +53,7 @@ export default () => {
       })
   })
 }
+
+setTimeout(() => {
+  // h()
+}, 1000)

@@ -3,10 +3,11 @@
 require('source-map-support/register')
 
 const { resolve, join } = require('path')
-const parseArgs = require("minimist")
+const parseArgs = require('minimist')
 const { existsSync, readFileSync } = require('fs')
-const Server = require("../server")
-const { printAndExit } = require("../lib/utils")
+const Server = require('../server')
+const { printAndExit } = require('../lib/utils')
+const pkgUp = require('pkg-up')
 
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
@@ -60,8 +61,11 @@ srv.start(argv.port, argv.hostname)
 .catch((err) => {
   if (err.code === 'EADDRINUSE') {
     let errorMessage = `Port ${argv.port} is already in use.`
-    const pkgAppPath = pkg.sync('.')
+    const pkgAppPath = pkgUp.sync('.')
     const appPackage = JSON.parse(readFileSync(pkgAppPath, 'utf8'))
+    const nenvScript = Object.entries(appPackage.scripts).find(scriptLine => scriptLine[1] === 'nenv')
+    if (nenvScript) errorMessage += `\nUse \`npm run ${nenvScript[0]} -- -p <some other port>\`.`
+    console.error(errorMessage)
   } else {
     console.log(err)
   }

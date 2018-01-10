@@ -15,6 +15,7 @@ const vueLoaderOptions = require('./vue-loader.conf')
 const PagesPlugin = require('./plugins/pages-plugin')
 const CombineAssetsPlugin = require('./plugins/combine-assets-plugin')
 const getConfig = require('../config')
+const pkg = require('../../package')
 
 const defaultPages = [
 
@@ -30,7 +31,8 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
   dir = realpathSync(resolve(dir))
   const config = getConfig(dir, conf)
   const defaultEntries = dev ? [
-    join(__dirname, '..', '..', 'client', 'webpack-hot-middleware-client')
+    join(__dirname, '..', '..', 'client', 'webpack-hot-middleware-client'),
+    join(__dirname, '..', '..', 'client', 'on-demand-entries-client')
   ] : []
   const mainJS = dev
         ? require.resolve('../../client/nenv-dev') : require.resolve('../../client/nenv')
@@ -86,7 +88,9 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       name: 'commons',
       filename: 'commons.js',
       minChunks (module, count) {
-        if (module.context && module.context.indexOf(`${sep}vue${sep}`) >= 0) {
+        console.log(module.context)
+        if (module.context && module.context.indexOf(`${sep}nenv${sep}`) >= 0) {
+          console.log('vueueue')
           return true
         }
         if (dev) {
@@ -106,6 +110,9 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(dev ? 'development' : 'production')
+    }),
+    new webpack.DefinePlugin({
+      'process.env.VERSION': `'${pkg.version}'`
     }),
     new PagesPlugin(),
     new CaseSensitivePathPlugin()
@@ -180,6 +187,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
           return /node_modules/.test(str) && str.indexOf(nenvPagesDir) !== 0
         },
         options: {
+          name: 'dist/[path][name].[ext]',
           interpolateName: (name) => name.replace('.vue', '.js'),
           validateFileName (file) {
             const cases = [{from: '.js', to: '.vue'}, {from: '.vue', to: '.js'}]
@@ -197,6 +205,11 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
               }
             }
           }
+          // transfrom ({ content, sourceMap, interpolatedName }) {
+          //   if (!(/\.(js|vue)$/.test(interpolatedName))) {
+          //     return { content, sourceMap }
+          //   }
+          // }
         }
       },
       {
@@ -216,6 +229,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         },
         options: {
           //
+          cacheDirectory: true
         }
       },
       {
@@ -251,13 +265,13 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       filename: '[name]',
       // publicPath:
       strictModuleExceptionHandling: true,
-      // devtoolModuleFilenameTemplate ({ resourcePath }) {
-      //   const hash = createHash('sha1')
-      //   hash.update(Date.now() + '')
-      //   const id = hash.digest('hex').slice(0, 7)
-      //   return `webpack:///${resourcePath}?${id}`
-      // },
-      chunkFilename: '[name]'
+      devtoolModuleFilenameTemplate ({ resourcePath }) {
+        const hash = createHash('sha1')
+        hash.update(Date.now() + '')
+        const id = hash.digest('hex').slice(0, 7)
+        return `webpack:///${resourcePath}?${id}`
+      },
+      chunkFilename: '[name][hash:7]'
     },
     resolve: {
       extensions: ['.js', '.vue', '.json'],

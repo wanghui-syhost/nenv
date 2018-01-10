@@ -1,18 +1,20 @@
 i.png-icon {
     display: inline-block;
     position: relative;
+
+    vertical-align: middle;
     
-    width: 16px;
-    height: 16px;
+    width: 24px;
+    height: 24px;
 
     &.small {
-        width: 14px;
-        height: 14px;
+        width: 18px;
+        height: 18px;
     }
 
     &.larger {
-        width: 20px;
-        height: 20px;
+        width: 30px;
+        height: 30px;
     }
 
     &:after {

@@ -3,6 +3,7 @@ const WebpackDevMiddleware = require('webpack-dev-middleware')
 const WebpackHotMiddleware = require('webpack-hot-middleware')
 const webpack = require('./build/webpack')
 const getConfig = require('./config')
+const UUID = require('uuid')
 const { IS_BUNDLED_PAGE } = require('./utils')
 
 module.exports = class HotReloader {
@@ -16,6 +17,11 @@ module.exports = class HotReloader {
     this.stats = null
     this.compilationErrors = null
     this.prevAssets = null
+    this.prevChunkNames = null
+    this.prevFailedChunkNames = null
+    this.prevChunkHashes = null
+
+    this.buildId = UUID.v4()
 
     this.config = getConfig(dir, conf)
   }
@@ -33,7 +39,7 @@ module.exports = class HotReloader {
 
   async start () {
     const [compiler] = await Promise.all([
-      webpack(this.dir, { buildDir: this.buildId, dev: true, quiet: this.quiet })
+      webpack(this.dir, { buildId: this.buildId, dev: true, quiet: this.quiet })
     ])
 
     const buildTools = await this.prepareBuildTools(compiler)
@@ -172,6 +178,7 @@ module.exports = class HotReloader {
     const webpackDevMiddleware = WebpackDevMiddleware(compiler, webpackDevMiddlewareConfig)
 
     const webpackHotMiddleware = WebpackHotMiddleware(compiler, {
+      path: '/_nenv/webpack-hmr',
       // log: false,
       heartbeat: 2500
     })

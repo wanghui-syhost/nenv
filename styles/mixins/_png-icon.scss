@@ -1,7 +1,7 @@
 @mixin make-icons ($icons) {
-    // @debug $icons;
+    @debug $icons;
     @each $name, $filename in $icons {
-        &.#{name} {
+        &.#{$name} {
             &:after {
                 background-image: url(./#{$filename}.png)
             }

@@ -2,18 +2,25 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Vuex, { Store } from 'vuex'
 import ElementUI from 'element-ui'
+import Nprogress from 'nprogress'
 
 import 'element-ui/lib/theme-chalk/index.css'
 import 'normalize.css/normalize.css'
 import '../styles/nenv.scss'
 
+import PageLoader from '../lib/page-loader'
 import unfetch from '../lib/unfetch'
 
 import * as filters from '../lib/filters'
+import router from '../lib/router'
+
+import logo from '../lib/logo'
+
+import { StorageBuilder } from '../lib/storage'
 
 import App from './App'
 
-import { userLogin, platformFetchMeus } from './api'
+import { userLogin, userLogout, platformFetchMenus } from './api'
 
 window.unfetch = unfetch
 
@@ -29,19 +36,49 @@ Vue.use(ElementUI, {
   size: 'medium'
 })
 
+const buildId = ''
+const assetPrefix = ''
+const pageLoader = new PageLoader(buildId, assetPrefix)
+
+window.__NENV_REGISTER_PAGE = pageLoader.registerPage.bind(pageLoader)
+
 const nenv = {
+  version: process.env.VERSION,
   raw: {},
   layouts: {},
   stores: {},
-  routes: []
+  routes: [],
+  pageLoader: pageLoader
 }
 
 // 声明空路由
-const router = new Router({
-  routes: [],
-  linkActiveClass: 'active'
+// const router = new Router({
+//   routes: [],
+//   linkActiveClass: 'active'
+// })
+
+router.beforeEach((to, from, next) => {
+  Nprogress.start()
+  next()
 })
+
+router.afterEach(() => {
+  Nprogress.done()
+})
+
 nenv.raw.router = router
+
+const platformStorage = (new StorageBuilder('platform', {
+  menus: Array
+})).storage
+
+const style = document.createElement('style')
+style.type = 'text/css'
+const head = document.getElementsByTagName('head')[0]
+style.innerHTML = `
+
+`
+head.appendChild(style)
 
 // 声明空store
 const store = new Store({
@@ -57,20 +94,33 @@ const store = new Store({
     platform: {
       namespaced: true,
       state: {
-        menus: JSON.parse(localStorage.getItem('platform.menu') || '[]')
+        menus: platformStorage.menus,
+        theme: {
+          palette: {
+            primaryColor: 'blue'
+          },
+          el: style,
+          classes: {
+
+          }
+        }
       },
       mutations: {
         UPDATE_MENUS: (state, menus) => {
           state.menus = menus
-          localStorage.setItem('platform.menu', JSON.stringify(menus))
+          platformStorage.menus = menus
+          // localStorage.setItem('platform.menus', JSON.stringify(menus))
         }
       },
       actions: {
-        async fetchMeus ({ commit, state }, { token } = {}) {
-          const menus = (await platformFetchMeus({}, { headers: {
+        async fetchMenus ({ commit, state }, { token } = {}) {
+          const menus = (await platformFetchMenus({}, { headers: {
             Authorization: token
           }})).data
           commit('UPDATE_MENUS', menus)
+        },
+        async theming ({ commit, state }) {
+          const el = state.el
         }
       }
     },
@@ -96,6 +146,9 @@ const store = new Store({
           const { token, user } = (await userLogin(credential)).data
           await commit('UPDATE_TOKEN', token)
           await commit('UPDATE_PROFILE', user)
+        },
+        async logout ({ commit, dispatch }) {
+          await userLogout()
         }
       }
     }
@@ -103,7 +156,10 @@ const store = new Store({
   actions: {
     async login ({ commit, dispatch, state }, credential) {
       await dispatch('user/userLogin', credential)
-      await dispatch('platform/fetchMeus', { token: state.user.token })
+      await dispatch('platform/fetchMenus', { token: state.user.token })
+    },
+    async logout ({ commit, dispatch, state }) {
+      await dispatch('user/logout')
     }
   }
 })
@@ -114,9 +170,10 @@ export const loader = (options = {}) => {
     options = options()
   }
 
-  console.log(options)
+  // console.log(options)
 
-  let { layout, store, router, path, isRoot } = options
+  let { layout, store, router, path, routerDepth } = options
+  console.log(routerDepth)
 
   // 如果有store 则注册store
   if (store) {
@@ -127,7 +184,7 @@ export const loader = (options = {}) => {
     nenv.stores[store.name] = store
   }
 
-  // 如果是布局 则注册布局
+  // 如果有布局 则注册布局
   if (layout) {
     nenv.layouts[layout.name] = layout
   }
@@ -142,7 +199,7 @@ export const loader = (options = {}) => {
     // 如果router的render属性是函数， 则认为是vue组件
     if (typeof router.render === 'function') {
       // 如果申明为跟路由
-      if (isRoot) {
+      if (routerDepth === 0) {
         router = {
           path,
           component: router
@@ -164,8 +221,9 @@ export const loader = (options = {}) => {
     }
 
     recursivelyProcessRoute(router)
-
-    console.log(router)
+    // debugger
+    // window.__NENV_REGISTER_PAGE(router[0].path, router)
+    // console.log(router)
     nenv.routes = nenv.routes.concat(router)
     nenv.raw.router.addRoutes(router)
   }
@@ -178,7 +236,7 @@ function recursivelyProcessRoute (routes, { parent = '' } = {}) {
 
     //
     if (router.children) {
-      // 如果有子路由但没有声明 组件,则自动注入 组件
+      // 如果有子路由但没有声明 组件,则自动注入组件
       if (!router.component) {
         router.component = getLayout()
       }
@@ -217,9 +275,24 @@ export const mount = () => {
   })
 }
 
+nenv.platformStorage = platformStorage
+
 nenv.loader = loader
+
+window.open = function open (flag) {
+  if (flag) {
+    throw new Error(`[window.open] may be blocked by browser, So platform ban this api`)
+  } else {
+    return window.open()
+  }
+}
 
 window.nenv = nenv
 export default async () => {
+  console.log(`
+Version: ${nenv.version}
+Have a great day! 📣🐢
+  `)
+  console.log(logo)
   mount()
 }

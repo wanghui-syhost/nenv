@@ -7,7 +7,14 @@ export function userLogin (params) {
   })
 }
 
-export function platformFetchMeus (params, options) {
+export function userLogout () {
+  return unfetch({
+    url: '/user/logout',
+    method: 'post'
+  })
+}
+
+export function platformFetchMenus (params, options) {
   return unfetch({
     url: '/user/menu',
     method: 'get',

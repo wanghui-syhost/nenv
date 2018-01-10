@@ -1,6 +1,6 @@
 /* eslint-disable */
 require('eventsource-polyfill')
-var webpackHotMiddlewareClient = require('webpack-hot-middleware/client?noInfo=true&reload=true')
+var webpackHotMiddlewareClient = require('webpack-hot-middleware/client?reload=true&&path=/_nenv/webpack-hmr')
 
 export default () => {
   const handlers = {

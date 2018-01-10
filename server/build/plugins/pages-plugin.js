@@ -24,7 +24,7 @@ class PageChunlTemplatePlugin {
       `)
       source.add(modules)
       source.add(`
-          console.log('PagesPlugin(chunk.name): ${routeName}')
+          // console.log('PagesPlugin(chunk.name): ${routeName}')
           comp =  comp.default || comp
           return {path: '${routeName}', ...comp}
         })

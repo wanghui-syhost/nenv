@@ -4,6 +4,7 @@ const fs = require('fs')
 const express = require('express')
 const http = require('http')
 const proxyMiddleware = require('http-proxy-middleware')
+const historyApiFallbackMiddleware = require('connect-history-api-fallback')
 const getConfig = require('./config')
 const { STATUS_CODES } = http
 
@@ -17,7 +18,6 @@ module.exports = class Server {
 
     this.dir = resolve(dir)
     this.dev = dev
-        // this.router = new
     this.hotReloader = this.getHotReloader(this.dir, { quiet, conf })
     this.proxy = this.getProxy(this.dir, {quiet, conf})
     this.http = null
@@ -93,11 +93,13 @@ module.exports = class Server {
   async start (port, hostname) {
     await this.prepare()
 
-    this.app.use(path.posix.join(this.dir, 'static'), express.static('./static'))
-
     this.app.use(this.proxy)
 
+    this.app.use(historyApiFallbackMiddleware())
+
     this.app.use(this.getRequestHandler())
+
+    this.app.use(path.posix.join(this.dir, 'static'), express.static('./static'))
 
     this.http = http.createServer(this.app)
 
