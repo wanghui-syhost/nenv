@@ -40,6 +40,7 @@ const buildId = ''
 const assetPrefix = ''
 const pageLoader = new PageLoader(buildId, assetPrefix)
 
+window.Vue = Vue
 window.__NENV_REGISTER_PAGE = pageLoader.registerPage.bind(pageLoader)
 
 const nenv = {
@@ -281,7 +282,10 @@ nenv.loader = loader
 
 window.open = function open (flag) {
   if (flag) {
-    throw new Error(`[window.open] may be blocked by browser, So platform ban this api`)
+    window.confirm(`
+Forbidden!!!
+[window.open] may be blocked by browser, So platform ban this api
+`)
   } else {
     return window.open()
   }
