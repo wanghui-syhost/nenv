@@ -1,4 +1,4 @@
-#!/user/bin/env node
+#!/usr/bin/env node
 const { join, resolve } = require('path')
 const { spawn } = require('cross-spawn')
 const { watchFile } = require('fs')

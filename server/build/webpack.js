@@ -7,12 +7,14 @@ const WriteFilePlugin = require('write-file-webpack-plugin')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 const CaseSensitivePathPlugin = require('case-sensitive-paths-webpack-plugin')
 const HtmlWebpckPlugin = require('html-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 
 const { styleLoaders, assetsPath } = require('./utils')
 const vueLoaderOptions = require('./vue-loader.conf')
 
 const PagesPlugin = require('./plugins/pages-plugin')
+const babelCore = reuqire('babel-core')
 const CombineAssetsPlugin = require('./plugins/combine-assets-plugin')
 const getConfig = require('../config')
 const pkg = require('../../package')
@@ -163,11 +165,34 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
             })
         )
     plugins.push(new webpack.optimize.ModuleConcatenationPlugin())
+    plugins.push(new CopyWebpackPlugin([
+      {
+        form: resolve(dir, 'static'),
+        to: buildDir,
+        ignore: ['.*']
+      }
+    ]))
   }
 
   const nodePathList = (process.env.NODE_PATH || '')
         .split(process.platform === 'win32' ? ';' : '')
         .filter((p) => !!p)
+  
+  const mainBabelOptions = {
+    cacheDirectory: true,
+    presets: []
+  }
+
+  const externalBabelConfig = false//findBabelCOnfig
+  if (externalBabelConfig) {
+    
+  } else {
+    mainBabelOptions.babelrc = false
+  }
+
+  if (!mainBabelOptions.babelrc) {
+
+  }
 
   const rules = (dev ? [...styleLoaders({
     sourceMap: true
@@ -204,10 +229,48 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
                 throw new Error(`Both ${from} and ${to} file found. Please make surce you only have one of both`)
               }
             }
-          }
+          },
           // transfrom ({ content, sourceMap, interpolatedName }) {
           //   if (!(/\.(js|vue)$/.test(interpolatedName))) {
           //     return { content, sourceMap }
+          //   }
+
+          //   const babelRuntimePath = require('babel-runtime/package').replace(/[\\/]package\.json$/, '')
+          //   const transpiled = babelCore.transform(content, {
+          //     babelrc: false,
+          //     sourceMap: dev ? 'both' : false,
+
+          //     plugins: [
+          //       //require.resolve
+          //       [require.resolve('babel-plugin-transfrom-es2015-modules-commonjs')],
+          //       [
+          //         require.resolve('babel-plugin-module-resolver'),
+          //         {
+          //           alias: {
+          //             'babel-runtime': babelRuntimePath
+          //           }
+          //         }
+          //       ]
+          //     ],
+          //     inputSourceMap: sourceMap
+          //   })
+
+          //   let { map } = transpiled
+          //   let output = transpiled.code
+
+          //   if (map) {
+          //     let nodeMap = Object.assign({}, map)
+          //     nodeMap.sources = nodeMap,sources.map((source) => source.replace(/\?entry/, ''))
+          //     delete nodeMap.sourcesContent
+
+          //     console.log('zzzz')
+          //     const sourceMapUrl = new Buffer(JSON.stringify(nodeMap), 'utf-8').toString('base64')
+          //     output = `${output}\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,${sourceMapUrl}`
+          //   }
+
+          //   return {
+          //     content,
+          //     sourceMap: transpiled.map
           //   }
           // }
         }

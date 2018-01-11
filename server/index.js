@@ -62,6 +62,10 @@ module.exports = class Server {
     }
   }
 
+  getMock (dir, { quiet, conf } = {}) {
+    
+  }
+
   async prepare () {
     if (this.hotReloader) {
       await this.hotReloader.start()
