@@ -14,7 +14,7 @@ const { styleLoaders, assetsPath } = require('./utils')
 const vueLoaderOptions = require('./vue-loader.conf')
 
 const PagesPlugin = require('./plugins/pages-plugin')
-const babelCore = reuqire('babel-core')
+const babelCore = require('babel-core')
 const CombineAssetsPlugin = require('./plugins/combine-assets-plugin')
 const getConfig = require('../config')
 const pkg = require('../../package')
