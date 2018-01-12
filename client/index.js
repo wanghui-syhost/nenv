@@ -173,8 +173,8 @@ export const loader = (options = {}) => {
 
   // console.log(options)
 
+  // routerDepth 用来表明页面的路由深度
   let { layout, store, router, path, routerDepth } = options
-  console.log(routerDepth)
 
   // 如果有store 则注册store
   if (store) {
@@ -269,7 +269,7 @@ export const mount = () => {
   raw.router = router
   raw.store = store
   raw.root = new Vue({
-    el: '#app',
+    el: '#nenv',
     router,
     store,
     render: h => h(App)

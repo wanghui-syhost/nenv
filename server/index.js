@@ -103,7 +103,7 @@ module.exports = class Server {
 
     this.app.use(this.getRequestHandler())
 
-    this.app.use(path.posix.join(this.dir, 'static'), express.static('./static'))
+    this.app.use('/static', express.static(join(this.dir, './static')))
 
     this.http = http.createServer(this.app)
 
@@ -114,9 +114,14 @@ module.exports = class Server {
     })
   }
 
-  async run (req, res) {
+  async run (req, res, next) {
     if (this.hotReloader) {
-      await this.hotReloader.run(req, res)
+      try {
+        await this.hotReloader.run(req, res, next)
+        next()
+      } catch (err) {
+        next(err)
+      }
     }
   }
 

@@ -26,7 +26,7 @@ module.exports = class HotReloader {
     this.config = getConfig(dir, conf)
   }
 
-  async run (req, res) {
+  async run (req, res, next) {
     for (const fn of this.middlewares) {
       await new Promise((resolve, reject) => {
         fn(req, res, (err) => {

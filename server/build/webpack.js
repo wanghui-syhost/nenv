@@ -14,9 +14,10 @@ const { styleLoaders, assetsPath } = require('./utils')
 const vueLoaderOptions = require('./vue-loader.conf')
 
 const PagesPlugin = require('./plugins/pages-plugin')
-const babelCore = require('babel-core')
 const CombineAssetsPlugin = require('./plugins/combine-assets-plugin')
 const getConfig = require('../config')
+const babelCore = require('babel-core')
+const findBabelConfig = require('./babel/find-config')
 const pkg = require('../../package')
 
 const defaultPages = [
@@ -47,7 +48,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         ...defaultEntries,
         ...config.clientBootstrap || [],
         mainJS,
-        join(dir, 'src', 'entry.js')
+        join(dir, 'entry.js')
       ]
     }
 
@@ -90,9 +91,8 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       name: 'commons',
       filename: 'commons.js',
       minChunks (module, count) {
-        console.log(module.context)
+        // console.log(module.context)
         if (module.context && module.context.indexOf(`${sep}nenv${sep}`) >= 0) {
-          console.log('vueueue')
           return true
         }
         if (dev) {
@@ -125,8 +125,9 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       new webpack.HotModuleReplacementPlugin(),
       new webpack.NoEmitOnErrorsPlugin(),
       new HtmlWebpckPlugin({
+        title: config.title,
         filename: 'index.html',
-        template: 'index.html',
+        template: join(__dirname, '../../client', 'app.ejs'), //'index.html',
         inject: true
       })
     )
@@ -138,8 +139,10 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     // )
   } else {
     plugins.push(new HtmlWebpckPlugin({
+      title: config.title,
       filename: 'index.html',
-      template: 'index.html',
+      template: join(__dirname, '../../client', 'app.ejs'),
+      // template: join(__dirname, 'clent') ,//'index.html',
       inject: true,
       minify: {
         removeComments: true,
@@ -177,21 +180,25 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
   const nodePathList = (process.env.NODE_PATH || '')
         .split(process.platform === 'win32' ? ';' : '')
         .filter((p) => !!p)
-  
+
   const mainBabelOptions = {
     cacheDirectory: true,
     presets: []
   }
 
-  const externalBabelConfig = false//findBabelCOnfig
+  const externalBabelConfig = findBabelConfig(dir)
   if (externalBabelConfig) {
-    
+    console.log(`> Using external babel configuration`)
+    console.log(`> Location: ${externalBabelConfig.loc}`)
+
+    const { options } = externalBabelConfig
+    mainBabelOptions.babelrc = options.babelrc !== false
   } else {
     mainBabelOptions.babelrc = false
   }
 
   if (!mainBabelOptions.babelrc) {
-
+    mainBabelOptions.presets.push(require.resolve('./babel/preset'))
   }
 
   const rules = (dev ? [...styleLoaders({
@@ -230,49 +237,49 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
               }
             }
           },
-          // transfrom ({ content, sourceMap, interpolatedName }) {
-          //   if (!(/\.(js|vue)$/.test(interpolatedName))) {
-          //     return { content, sourceMap }
-          //   }
+          transfrom ({ content, sourceMap, interpolatedName }) {
+            if (!(/\.(js|vue)$/.test(interpolatedName))) {
+              return { content, sourceMap }
+            }
 
-          //   const babelRuntimePath = require('babel-runtime/package').replace(/[\\/]package\.json$/, '')
-          //   const transpiled = babelCore.transform(content, {
-          //     babelrc: false,
-          //     sourceMap: dev ? 'both' : false,
+            const babelRuntimePath = require('babel-runtime/package').replace(/[\\/]package\.json$/, '')
+            const transpiled = babelCore.transform(content, {
+              babelrc: false,
+              sourceMap: dev ? 'both' : false,
 
-          //     plugins: [
-          //       //require.resolve
-          //       [require.resolve('babel-plugin-transfrom-es2015-modules-commonjs')],
-          //       [
-          //         require.resolve('babel-plugin-module-resolver'),
-          //         {
-          //           alias: {
-          //             'babel-runtime': babelRuntimePath
-          //           }
-          //         }
-          //       ]
-          //     ],
-          //     inputSourceMap: sourceMap
-          //   })
+              plugins: [
+                //require.resolve
+                [require.resolve('babel-plugin-transfrom-es2015-modules-commonjs')],
+                [
+                  require.resolve('babel-plugin-module-resolver'),
+                  {
+                    alias: {
+                      'babel-runtime': babelRuntimePath
+                    }
+                  }
+                ]
+              ],
+              inputSourceMap: sourceMap
+            })
 
-          //   let { map } = transpiled
-          //   let output = transpiled.code
+            let { map } = transpiled
+            let output = transpiled.code
 
-          //   if (map) {
-          //     let nodeMap = Object.assign({}, map)
-          //     nodeMap.sources = nodeMap,sources.map((source) => source.replace(/\?entry/, ''))
-          //     delete nodeMap.sourcesContent
+            if (map) {
+              let nodeMap = Object.assign({}, map)
+              nodeMap.sources = nodeMap.sources.map((source) => source.replace(/\?entry/, ''))
+              delete nodeMap.sourcesContent
 
-          //     console.log('zzzz')
-          //     const sourceMapUrl = new Buffer(JSON.stringify(nodeMap), 'utf-8').toString('base64')
-          //     output = `${output}\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,${sourceMapUrl}`
-          //   }
+              console.log('zzzz')
+              const sourceMapUrl = Buffer.from(JSON.stringify(nodeMap), 'utf-8').toString('base64')
+              output = `${output}\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,${sourceMapUrl}`
+            }
 
-          //   return {
-          //     content,
-          //     sourceMap: transpiled.map
-          //   }
-          // }
+            return {
+              content: output,
+              sourceMap: transpiled.map
+            }
+          }
         }
       },
       {
@@ -292,7 +299,9 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         },
         options: {
           //
-          cacheDirectory: true
+          babelrc: false,
+          cacheDirectory: true,
+          presets: [require.resolve('./babel/preset')]
         }
       },
       {
@@ -318,6 +327,16 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
           name: 'videos/[name].[hash:7].[ext]'
         }
       }
+      // ,
+      // {
+      //   test: /\.(js|vue)(\?[^?]*)?$/,
+      //   loader: 'babel-loader',
+      //   include: [dir],
+      //   exclude (str) {
+
+      //   },
+      //   options: mainBabelOptions
+      // }
     ])
 
   let webpackConfig = {

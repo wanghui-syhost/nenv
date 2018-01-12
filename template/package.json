@@ -1,0 +1,15 @@
+{
+  "name": "nenv-stardart-project",
+  "version": "1.0.0",
+  "description": "\"A nenv porject\"",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nenv dev",
+    "build": "nenv build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  }
+}

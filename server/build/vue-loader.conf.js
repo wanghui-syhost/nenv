@@ -8,9 +8,14 @@ const sourceMapEnabled = isProduction
 
 module.exports = {
   loaders: {
-    // js: {
-    //   loader: 'babel-loader'
-    // },
+    js: {
+      loader: 'babel-loader',
+      options: {
+        babelrc: false,
+        cacheDirectory: true,
+        presets: [require.resolve('./babel/preset')]
+      }
+    },
     ...utils.cssLoaders({
       sourceMap: sourceMapEnabled,
       extract: isProduction
