@@ -37,6 +37,7 @@ exports.cssLoaders = function (options) {
       loaders.push({
         loader: loader + '-loader',
         options: Object.assign({}, loaderOptions, {
+          config: path.join('../../.postcssrc.js'),
           sourceMap: options.sourceMap
         })
       })

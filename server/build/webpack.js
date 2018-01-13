@@ -116,6 +116,9 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     new webpack.DefinePlugin({
       'process.env.VERSION': `'${pkg.version}'`
     }),
+    new webpack.DefinePlugin({
+      'process.env.project': JSON.stringify(config.project)
+    }),
     new PagesPlugin(),
     new CaseSensitivePathPlugin()
   ]
@@ -125,7 +128,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       new webpack.HotModuleReplacementPlugin(),
       new webpack.NoEmitOnErrorsPlugin(),
       new HtmlWebpckPlugin({
-        title: config.title,
+        title: config.project.title,
         filename: 'index.html',
         template: join(__dirname, '../../client', 'app.ejs'), //'index.html',
         inject: true
@@ -139,7 +142,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     // )
   } else {
     plugins.push(new HtmlWebpckPlugin({
-      title: config.title,
+      title: config.project.title,
       filename: 'index.html',
       template: join(__dirname, '../../client', 'app.ejs'),
       // template: join(__dirname, 'clent') ,//'index.html',

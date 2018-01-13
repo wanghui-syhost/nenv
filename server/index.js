@@ -2,6 +2,7 @@ const path = require('path')
 const { resolve, join, sep } = path
 const fs = require('fs')
 const express = require('express')
+const mockjs = require('mockjs')
 const http = require('http')
 const proxyMiddleware = require('http-proxy-middleware')
 const historyApiFallbackMiddleware = require('connect-history-api-fallback')
@@ -19,9 +20,10 @@ module.exports = class Server {
     this.dir = resolve(dir)
     this.dev = dev
     this.hotReloader = this.getHotReloader(this.dir, { quiet, conf })
-    this.proxy = this.getProxy(this.dir, {quiet, conf})
-    this.http = null
     this.config = getConfig(this.dir, conf)
+    this.mocker = this.getMock(this.dir, { quiet, conf })
+    this.proxy = this.getProxy(this.dir, { quiet, conf })
+    this.http = null
     this.dist = this.config.distDir
     this.app = express()
   }
@@ -47,7 +49,8 @@ module.exports = class Server {
   getProxy (dir, { quiet, conf } = { }) {
     let fn = (req, res, next) => next()
     try {
-      const proxyTable = require(join(dir, 'proxy'))
+      console.log(this.config)
+      const proxyTable = this.config.proxy || {}
       console.log(proxyTable)
       Object.keys(proxyTable).forEach((context) => {
         let options = proxyTable[context]
@@ -58,12 +61,62 @@ module.exports = class Server {
       })
       return fn
     } catch (e) {
+      console.log(e)
       return fn
     }
   }
 
   getMock (dir, { quiet, conf } = {}) {
-    
+    const serverFile = join(dir, 'server.js')
+
+    function requireServer (filename) {
+      let middleware = null
+      delete require.cache[filename]
+      try {
+        const router = express.Router()
+        middleware = require(filename)(router, mockjs)
+      } catch (err) {
+        console.log(err)
+        middleware = null
+      }
+      return middleware
+    }
+
+    let middleware = requireServer(serverFile)
+
+    fs.watch(serverFile, function () {
+      middleware = requireServer(serverFile)
+    })
+
+    return function (req, res, next) {
+      if (middleware) {
+        try {
+          // 如果是以.结尾的则直接通过
+          if (/\.[^.]*$/.test(req.path)) {
+            next()
+          } else {
+            res.reply = function (data, { code = 0, msg = '成功' } = {}) {
+              res.send({
+                data: data,
+                code: code,
+                msg: msg
+              })
+            }
+            middleware(req, res, function (err) {
+              if (err) {
+                console.log(err)
+              } else {
+                next()
+              }
+            })
+          }
+        } catch (err) {
+          next(err)
+        }
+      } else {
+        next()
+      }
+    }
   }
 
   async prepare () {
@@ -96,6 +149,8 @@ module.exports = class Server {
 
   async start (port, hostname) {
     await this.prepare()
+
+    this.app.use(this.mocker)
 
     this.app.use(this.proxy)
 

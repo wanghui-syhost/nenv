@@ -13,7 +13,9 @@ const defaultConfig = {
   useFileSystemPublicRoutes: true,
   layoutsGlobPattern: 'layouts/**/*.+(js|vue)',
   pagesGlobPattern: 'pages/**/*.nenv.+(js|vue)',
-  title: 'nenv 开发工具'
+  project: {
+    title: 'nenv 开发工具'
+  }
 }
 
 module.exports = function getConfig (dir, customConfig) {
@@ -43,5 +45,6 @@ function loadConfig (dir, customConfig) {
 }
 
 function withDefaults (config) {
+  config.project = Object.assign({}, defaultConfig.project, config.project || {})
   return Object.assign({}, defaultConfig, config)
 }

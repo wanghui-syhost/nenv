@@ -29,6 +29,8 @@ window.unfetch = unfetch
 Object.keys(filters).forEach(x => Vue.filter(x, filters[x]))
 
 Vue.prototype.$unfetch = unfetch
+const bus = new Vue()
+Vue.prototype.$bus = bus
 
 Vue.use(Router)
 Vue.use(Vuex)
@@ -45,6 +47,8 @@ window.__NENV_REGISTER_PAGE = pageLoader.registerPage.bind(pageLoader)
 
 const nenv = {
   version: process.env.VERSION,
+  project: process.env.project || {},
+  bus,
   raw: {},
   layouts: {},
   stores: {},
@@ -73,14 +77,6 @@ const platformStorage = (new StorageBuilder('platform', {
   menus: Array
 })).storage
 
-const style = document.createElement('style')
-style.type = 'text/css'
-const head = document.getElementsByTagName('head')[0]
-style.innerHTML = `
-
-`
-head.appendChild(style)
-
 // 声明空store
 const store = new Store({
   modules: {
@@ -95,22 +91,24 @@ const store = new Store({
     platform: {
       namespaced: true,
       state: {
+        title: document.getElementsByTagName('title')[0].innerHTML,
         menus: platformStorage.menus,
         theme: {
           palette: {
             primaryColor: 'blue'
           },
-          el: style,
           classes: {
 
           }
         }
       },
       mutations: {
+        UPDATE_TITLE: (state, title) => {
+          state.title = title
+        },
         UPDATE_MENUS: (state, menus) => {
           state.menus = menus
           platformStorage.menus = menus
-          // localStorage.setItem('platform.menus', JSON.stringify(menus))
         }
       },
       actions: {
@@ -120,8 +118,14 @@ const store = new Store({
           }})).data
           commit('UPDATE_MENUS', menus)
         },
-        async theming ({ commit, state }) {
-          const el = state.el
+        async changeTitle ({ commit, state }, title) {
+          commit('UPDATE_TITLE', title)
+        },
+        async theming ({ commit, state }, { classes, palette } = {}) {
+
+        },
+        async logout ({ commit, state }) {
+          // commit('DELETE_MENUS')
         }
       }
     },
@@ -133,6 +137,10 @@ const store = new Store({
         profile: JSON.parse(localStorage.getItem('user.profile') || '{}')
       },
       mutations: {
+        'DELETE_TOKEN': (state) => {
+          // localStorage
+          state.token = null
+        },
         'UPDATE_TOKEN': (state, token) => {
           localStorage.setItem('user.token', token)
           state.token = token
@@ -150,6 +158,7 @@ const store = new Store({
         },
         async logout ({ commit, dispatch }) {
           await userLogout()
+          commit('DELETE_TOKEN')
         }
       }
     }
@@ -161,6 +170,7 @@ const store = new Store({
     },
     async logout ({ commit, dispatch, state }) {
       await dispatch('user/logout')
+      await dispatch('platform/logout')
     }
   }
 })
@@ -216,7 +226,7 @@ export const loader = (options = {}) => {
         }
       }
     }
-    // 此处是路由数组
+    // 此处应该是路由数组
     if (!Array.isArray(router)) {
       router = [router]
     }
