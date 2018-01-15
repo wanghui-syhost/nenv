@@ -12,7 +12,7 @@ cnpm install git+ssh://git@192.168.37.5:nenv/nenv.git -g
 nenv init [<dir>] -n name
 
 # install dependencie
-nenv init
+cnpm install
 
 # serve with hot reload at localhost:8080
 npm run dev

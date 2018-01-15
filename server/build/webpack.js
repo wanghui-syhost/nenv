@@ -297,8 +297,8 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         exclude (str) {
           // console.log(str)
           return (/node_modules/.test(str) &&
-            str.indexOf('nenv') !== 0) ||
-            (str.indexOf('nenv/node_modules') === 0)
+            str.indexOf(join(__dirname, '..', '..')) !== 0) ||
+            (str.indexOf(join(__dirname, '..', '..', 'node_modules')) === 0)
         },
         options: {
           //
