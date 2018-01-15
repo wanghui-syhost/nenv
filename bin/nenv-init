@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 
+const download = require('download')
 const { resolve, join } = require('path')
 const { existsSync, readdirSync } = require('fs')
 const parseArgs = require('minimist')
-
+const home = require('user-home')
 const { printAndExit } = require('../lib/utils')
+const generate = require('../lib/generate')
 
 const argv = parseArgs(process.argv.slice(2), {
-  alise: {
-    h: 'help'
+  alias: {
+    h: 'help',
+    n: 'name'
   },
-  boolean: ['h']
+  boolean: ['h'],
+  string: ['n']
 })
 
 if (argv.help) {
@@ -20,6 +24,9 @@ if (argv.help) {
     Usage
       nenv init <dir>
     <dir> represents where the compile dist folder shoule go.
+
+    Options:
+      --name, -n the name of your project 
     If no directory is provided, the dist folder will be created in the current directoty.
   `)
   process.exit(0)
@@ -27,16 +34,52 @@ if (argv.help) {
 
 const dir = resolve(argv._[0] || '.')
 
-if (!existsSync(dir)) {
-  printAndExit(`> No such directory exists as the project root: ${dir}`)
+const name = argv.name
+
+console.log(dir)
+console.log(argv)
+if (!name) {
+  printAndExit(`> please use -n <name> to config project name`)
 }
 
-// (readdirSync(dir))
-if (readdirSync(dir).length !== 0) {
-  printAndExit(`> project root: ${dir} is not an empty directory`)
-  copyFiles(join(__dirname, '../template/static'), dir)
+// if (!existsSync(dir)) {
+//   printAndExit(`> No such directory exists as the project root: ${dir}`)
+// }
+
+// // (readdirSync(dir))
+// if (readdirSync(dir).length !== 0) {
+//   printAndExit(`> project root: ${dir} is not an empty directory`)
+//   copyFiles(join(__dirname, '../template/static'), dir)
+// }
+
+// function copyFiles (src, dist) {
+
+// }
+
+console.log(process.argv)
+
+const tmp = join(home, '.nenv-templates')
+
+function run () {
+  const officailTemplate = 'nenv/nenv'
+  // const officailTemplate = 'web/front-base'
+  downloadAndGengerate(officailTemplate)
 }
 
-function copyFiles (src, dist) {
+function downloadAndGengerate (template) {
+  // if (existsSync(tmp)) rmdir(tmp)
+  const downloadUrl = `http://192.168.37.5/${template}/repository/archive.zip?ref=master`
+  console.log(downloadUrl)
+  download(downloadUrl, tmp, { extract: true, strip: 1, mode: '666', headers: { accept: 'application/zip' } })
+  .then(() => {
+    console.log('ok')
+    generate(name, tmp, dir, err => {
 
+    })
+  })
+  .catch((err) => {
+    console.log(err)
+  })
 }
+
+run()
