@@ -12,11 +12,9 @@ module.exports = (context, opts = {}) => ({
     [require.resolve('babel-preset-stage-2')]
   ],
   plugins: [
-    [
-      require.resolve('babel-plugin-transform-object-rest-spread'),
-      require.resolve('babel-plugin-transform-class-properties'),
-      require.resolve('babel-plugin-transform-runtime'),
-      opts['transform-runtime'] || []],
+    require.resolve('babel-plugin-transform-object-rest-spread'),
+    require.resolve('babel-plugin-transform-class-properties'),
+    [require.resolve('babel-plugin-transform-runtime'), opts['transform-runtime'] || {}],
     [
       require.resolve('babel-plugin-module-resolver'),
       {
