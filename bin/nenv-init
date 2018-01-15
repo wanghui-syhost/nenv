@@ -58,8 +58,7 @@ if (!name) {
 const tmp = join(home, '.nenv-templates')
 
 function run () {
-  const officailTemplate = 'nenv/nenv'
-  // const officailTemplate = 'web/front-base'
+  const officailTemplate = 'nenv/nv-template'
   downloadAndGengerate(officailTemplate)
 }
 
