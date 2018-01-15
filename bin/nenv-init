@@ -7,6 +7,7 @@ const parseArgs = require('minimist')
 const home = require('user-home')
 const { printAndExit } = require('../lib/utils')
 const generate = require('../lib/generate')
+const del = require('del')
 
 const argv = parseArgs(process.argv.slice(2), {
   alias: {
@@ -36,8 +37,6 @@ const dir = resolve(argv._[0] || '.')
 
 const name = argv.name
 
-console.log(dir)
-console.log(argv)
 if (!name) {
   printAndExit(`> please use -n <name> to config project name`)
 }
@@ -56,8 +55,6 @@ if (!name) {
 
 // }
 
-console.log(process.argv)
-
 const tmp = join(home, '.nenv-templates')
 
 function run () {
@@ -67,14 +64,14 @@ function run () {
 }
 
 function downloadAndGengerate (template) {
-  // if (existsSync(tmp)) rmdir(tmp)
+  if (existsSync(tmp)) del.sync(tmp, {force: true})
   const downloadUrl = `http://192.168.37.5/${template}/repository/archive.zip?ref=master`
-  console.log(downloadUrl)
   download(downloadUrl, tmp, { extract: true, strip: 1, mode: '666', headers: { accept: 'application/zip' } })
   .then(() => {
-    console.log('ok')
     generate(name, tmp, dir, err => {
-
+      if (err) {
+        printAndExit(err)
+      }
     })
   })
   .catch((err) => {
