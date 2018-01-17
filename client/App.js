@@ -1,11 +1,6 @@
-<template>
-    <div id="nenv_root">
-        <router-view />
-    </div>
-</template>
-<script>
 import { mapState } from 'vuex'
 export default {
+  name: 'Nenv',
   data () {
     return {
       styleEl: null,
@@ -16,7 +11,7 @@ export default {
     const head = document.getElementsByTagName('head')[0]
     const styleEl = document.createElement('style')
     styleEl.type = 'text/css'
-    styleEl.className += 'nevn-theme'
+    styleEl.className += 'nenv-theme'
     head.appendChild(styleEl)
     this.styleEl = styleEl
   },
@@ -30,14 +25,12 @@ export default {
     title (val) {
       this.titleEl.innerHTML = val
     }
+  },
+  render (h, props) {
+    return h('div', {
+      domProps: {
+        id: 'nenv_root'
+      }
+    }, [h('router-view')])
   }
 }
-</script>
-<style lang="scss" scoped>
-    #nenv_root {
-        width: 100%;
-        height: 100%;
-    }
-</style>
-
-

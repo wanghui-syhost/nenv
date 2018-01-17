@@ -59,11 +59,11 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
 
     if (dev) {
       for (const p of devPages) {
-        entries[join('bundles', p.replace(/\.nenv\./g, '.').replace('.vue', '.js'))] = [`./${p}?entry`]
+        entries[join('bundles', p.replace(/\.nenv\./g, '.').replace('.vue', '.js')).replace(/\\/g, '/')] = [`./${p}?entry`]
       }
     } else {
       for (const p of pages) {
-        entries[join('bundles', p.replace(/\.nenv\./g, '.').replace('.vue', '.js'))] = [`./${p}?entry`]
+        entries[join('bundles', p.replace(/\.nenv\./g, '.').replace('.vue', '.js')).replace(/\\/g, '/')] = [`./${p}?entry`]
       }
     }
 
@@ -130,7 +130,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       new HtmlWebpckPlugin({
         title: config.project.title,
         filename: 'index.html',
-        template: join(__dirname, '../../client', 'app.ejs'), //'index.html',
+        template: join(__dirname, '../../client', 'app.ejs'), // 'index.html',
         inject: true
       })
     )
@@ -173,7 +173,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     plugins.push(new webpack.optimize.ModuleConcatenationPlugin())
     plugins.push(new CopyWebpackPlugin([
       {
-        form: resolve(dir, 'static'),
+        from: resolve(dir, 'static'),
         to: buildDir,
         ignore: ['.*']
       }
@@ -251,7 +251,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
               sourceMap: dev ? 'both' : false,
 
               plugins: [
-                //require.resolve
+                // require.resolve
                 [require.resolve('babel-plugin-transfrom-es2015-modules-commonjs')],
                 [
                   require.resolve('babel-plugin-module-resolver'),
@@ -273,7 +273,6 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
               nodeMap.sources = nodeMap.sources.map((source) => source.replace(/\?entry/, ''))
               delete nodeMap.sourcesContent
 
-              console.log('zzzz')
               const sourceMapUrl = Buffer.from(JSON.stringify(nodeMap), 'utf-8').toString('base64')
               output = `${output}\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,${sourceMapUrl}`
             }
@@ -348,7 +347,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     output: {
       path: buildDir ? join(buildDir, '.nenv') : join(dir, config.distDir),
       filename: '[name]',
-      // publicPath:
+      // publicPath: '/',
       strictModuleExceptionHandling: true,
       devtoolModuleFilenameTemplate ({ resourcePath }) {
         const hash = createHash('sha1')
@@ -356,7 +355,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         const id = hash.digest('hex').slice(0, 7)
         return `webpack:///${resourcePath}?${id}`
       },
-      chunkFilename: '[name][hash:7]'
+      chunkFilename: '[name]'
     },
     resolve: {
       extensions: ['.js', '.vue', '.json'],
