@@ -27,7 +27,24 @@ export default {
       this.titleEl.innerHTML = val
     },
     $route (to, from) {
+      // console.log(to)
+      const { menus } = this
+      function processMenu (menus, pathArray, route) {
+        for (let menu of menus) {
+          let menuPathArray = menu.linkUrl.substr(1).split('/')
+          if (menuPathArray.join('/') === pathArray.join('/')) {
+            route.meta.$name = menu.menuName
+            return
+          } else if (true) {
 
+          }
+        }
+      }
+      [to, from].forEach((r) => {
+        if (!r.meta.$name) {
+          processMenu(menus, r.fullPath.substr(1).split('/'), r)
+        }
+      })
     }
   },
   render (h, props) {
