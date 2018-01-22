@@ -3,6 +3,10 @@ export default {
     nvCode: {
       type: String,
       required: true
+    },
+    nvUrl: {
+      type: String,
+      default: '/dictionary/code'
     }
   },
   created () {
@@ -22,7 +26,7 @@ export default {
     fetchOptions () {
       const self = this
       window.unfetch({
-        url: '/dictionary/code',
+        url: self.nvUrl,
         methods: 'get',
         params: {
           CODE: self.nvCode

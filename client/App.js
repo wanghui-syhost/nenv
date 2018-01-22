@@ -18,12 +18,16 @@ export default {
   computed: {
     ...mapState('platform', {
       title: state => state.title,
-      themePalette: state => state.theme.palette
+      themePalette: state => state.theme.palette,
+      menus: state => state.menus
     })
   },
   watch: {
     title (val) {
       this.titleEl.innerHTML = val
+    },
+    $route (to, from) {
+
     }
   },
   render (h, props) {
