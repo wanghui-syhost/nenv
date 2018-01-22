@@ -7,6 +7,7 @@ const WriteFilePlugin = require('write-file-webpack-plugin')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 const CaseSensitivePathPlugin = require('case-sensitive-paths-webpack-plugin')
 const HtmlWebpckPlugin = require('html-webpack-plugin')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 
@@ -153,6 +154,9 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         removeAttributeQuotes: true
       },
       chunksSortMode: 'dependency'
+    }))
+    plugins.push(new ExtractTextPlugin({
+      filename: 'css/[name].css'
     }))
     plugins.push(new webpack.IgnorePlugin())
     plugins.push(
