@@ -14,7 +14,7 @@
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs"
   },
   "bin": {
-    "nenv": "./dist/bin/nenv"
+    "nenv": "./bin/nenv"
   },
   "dependencies": {
     "autoprefixer": "^7.1.2",
