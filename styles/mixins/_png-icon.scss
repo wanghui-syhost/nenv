@@ -1,5 +1,4 @@
 @mixin make-icons ($icons) {
-    @debug $icons;
     @each $name, $filename in $icons {
         &.#{$name} {
             &:after {
