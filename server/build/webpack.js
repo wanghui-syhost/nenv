@@ -8,6 +8,7 @@ const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 const CaseSensitivePathPlugin = require('case-sensitive-paths-webpack-plugin')
 const HtmlWebpckPlugin = require('html-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 
@@ -55,7 +56,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
 
     // 扫描页面
     const pages = await glob(config.pagesGlobPattern, { cwd: dir })
-    console.log('globPages', pages, dir)
+    // console.log('globPages', pages, dir)
     const devPages = pages.filter((p) => true)
 
     if (dev) {
@@ -69,7 +70,6 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     }
 
     totalPages = pages.filter((p) => true).length
-    console.log(entries)
     return entries
   }
 
@@ -155,9 +155,15 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       },
       chunksSortMode: 'dependency'
     }))
-    plugins.push(new ExtractTextPlugin({
-      filename: 'css/[name].css'
-    }))
+    plugins.push(
+      new ExtractTextPlugin({
+        filename: 'css/[name].css'
+      }),
+      new OptimizeCSSPlugin({
+        cssProcessorOptions: {
+          safe: true
+        }
+      }))
     plugins.push(new webpack.IgnorePlugin())
     plugins.push(
             new CombineAssetsPlugin({
