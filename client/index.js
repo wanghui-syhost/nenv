@@ -52,6 +52,7 @@ const nenv = {
   raw: {},
   layouts: {},
   stores: {},
+  flatRoutes: [],
   routes: [],
   pageLoader: pageLoader
 }
@@ -216,6 +217,7 @@ export const loader = (options = {}) => {
           component: router
         }
       } else {
+        nenv.flatRoutes.push({path, component: router})
         router = {
           path,
           component: getLayout(),
@@ -236,6 +238,7 @@ export const loader = (options = {}) => {
     // window.__NENV_REGISTER_PAGE(router[0].path, router)
     // console.log(router)
     nenv.routes = nenv.routes.concat(router)
+    // nenv.flatRoutes = nenv.routes
     nenv.raw.router.addRoutes(router)
   }
 }
