@@ -6,7 +6,7 @@
 
 ``` bash
 # install nenv
-cnpm install git+http://git@192.168.37.5:nenv/nenv.git -g
+cnpm install git+http://192.168.37.5:nenv/nenv.git -g
 
 # init project
 nenv init [<dir>] -n name
