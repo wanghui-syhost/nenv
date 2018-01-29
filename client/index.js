@@ -149,13 +149,18 @@ const store = new Store({
         'UPDATE_PROFILE': (state, profile) => {
           localStorage.setItem('user.profile', JSON.stringify(profile))
           state.profile = profile
+        },
+        'HOME_PATH': (state, homePath) => {
+          localStorage.setItem('user.homePath', homePath)
+          state.homePath = homePath
         }
       },
       actions: {
         async userLogin ({commit, dispatch}, credential) {
-          const { token, user } = (await userLogin(credential)).data
+          const {token, user, homePath} = (await userLogin(credential)).data
           await commit('UPDATE_TOKEN', token)
           await commit('UPDATE_PROFILE', user)
+          await commit('HOME_PATH', homePath)
         },
         async logout ({ commit, dispatch }) {
           await userLogout()
