@@ -132,7 +132,11 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         title: config.project.title,
         filename: 'index.html',
         template: join(__dirname, '../../client', 'app.ejs'), // 'index.html',
-        inject: true
+        inject: true,
+        chunksSortMode: function (chunk1, chunk2) {
+          const order = [ 'main.js', 'commons', 'manifest' ]
+          return order.indexOf(chunk2.names[0]) - order.indexOf(chunk1.names[0])
+        }
       })
     )
     if (!quiet) {
