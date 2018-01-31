@@ -10,7 +10,10 @@ export function userLogin (params) {
 export function userLogout () {
   return unfetch({
     url: '/user/logout',
-    method: 'post'
+    method: 'post',
+    headers: {
+      'Nv-Login-Disabled': true
+    }
   })
 }
 
