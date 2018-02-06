@@ -21,11 +21,11 @@ import { StorageBuilder } from '../lib/storage'
 import App from './App'
 
 import { userLogin, userLogout, platformFetchMenus } from './api'
+// import utils from './utils'
 
 window.unfetch = unfetch
 
 // 全局注册filters
-// Filters
 Object.keys(filters).forEach(x => Vue.filter(x, filters[x]))
 
 Vue.prototype.$unfetch = unfetch
@@ -54,14 +54,11 @@ const nenv = {
   stores: {},
   flatRoutes: [],
   routes: [],
-  pageLoader: pageLoader
+  pageLoader: pageLoader,
+  lib: {
+    StorageBuilder
+  }
 }
-
-// 声明空路由
-// const router = new Router({
-//   routes: [],
-//   linkActiveClass: 'active'
-// })
 
 router.beforeEach((to, from, next) => {
   Nprogress.start()
@@ -177,6 +174,7 @@ const store = new Store({
     async logout ({ commit, dispatch, state }) {
       await dispatch('user/logout')
       await dispatch('platform/logout')
+      nenv.bus.$emit('on-logout')
     }
   }
 })
