@@ -1,4 +1,4 @@
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 export default {
   name: 'Nenv',
   data () {
@@ -22,29 +22,33 @@ export default {
       menus: state => state.menus
     })
   },
+  methods: {
+    ...mapActions('platform', [
+      'changeActiveMenu',
+      'changeActiveTopMenu'
+    ])
+  },
   watch: {
     title (val) {
       this.titleEl.innerHTML = val
     },
-    $route (to, from) {
-      // console.log(to)
-      const { menus } = this
-      function processMenu (menus, pathArray, route) {
-        for (let menu of menus) {
-          let menuPathArray = menu.linkUrl.substr(1).split('/')
-          if (menuPathArray.join('/') === pathArray.join('/')) {
+    $route (route) {
+      const self = this
+      const { menus } = self
+      const fullPath = route.fullPath
+      function find (menus) {
+        for (const menu of menus) {
+          if (menu.linkUrl === fullPath) {
             route.meta.$name = menu.menuName
-            return
-          } else if (true) {
-
+            self.changeActiveMenu(menu)
+            return menu
+          } else if (menu.childrens && find(menu.childrens)) {
+            return menu
           }
         }
       }
-      [to, from].forEach((r) => {
-        if (!r.meta.$name) {
-          processMenu(menus, r.fullPath.substr(1).split('/'), r)
-        }
-      })
+
+      self.changeActiveTopMenu(find(menus))
     }
   },
   render (h, props) {

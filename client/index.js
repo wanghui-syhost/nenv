@@ -98,7 +98,9 @@ const store = new Store({
           classes: {
 
           }
-        }
+        },
+        acitveMenu: {},
+        activeTopMenu: {}
       },
       mutations: {
         UPDATE_TITLE: (state, title) => {
@@ -107,6 +109,12 @@ const store = new Store({
         UPDATE_MENUS: (state, menus) => {
           state.menus = menus
           platformStorage.menus = menus
+        },
+        UPDATE_ACTIVE_TOP_MENU: (state, menu) => {
+          state.activeTopMenu = menu
+        },
+        UPDATE_ACTIVE_MENU: (state, menu) => {
+          state.acitveMenu = menu
         }
       },
       actions: {
@@ -118,6 +126,12 @@ const store = new Store({
         },
         async changeTitle ({ commit, state }, title) {
           commit('UPDATE_TITLE', title)
+        },
+        async changeActiveMenu ({ commit, state }, menu) {
+          commit('UPDATE_ACTIVE_MENU', menu || {})
+        },
+        async changeActiveTopMenu ({ commit, state }, menu) {
+          commit('UPDATE_ACTIVE_TOP_MENU', menu || {})
         },
         async theming ({ commit, state }, { classes, palette } = {}) {
 
