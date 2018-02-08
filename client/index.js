@@ -310,16 +310,16 @@ nenv.platformStorage = platformStorage
 
 nenv.loader = loader
 
-window.open = function open (flag) {
-  if (flag) {
-    window.confirm(`
-Forbidden!!!
-[window.open] may be blocked by browser, So platform ban this api
-`)
-  } else {
-    return window.open()
-  }
-}
+// window.open = function open (flag) {
+//   if (flag) {
+//     window.confirm(`
+// Forbidden!!!
+// [window.open] may be blocked by browser, So platform ban this api
+// `)
+//   } else {
+//     return window.open()
+//   }
+// }
 
 window.nenv = nenv
 export default async () => {
