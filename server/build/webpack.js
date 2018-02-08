@@ -369,7 +369,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         const id = hash.digest('hex').slice(0, 7)
         return `webpack:///${resourcePath}?${id}`
       },
-      chunkFilename: '[name]'
+      chunkFilename: '[name].js'
     },
     resolve: {
       extensions: ['.js', '.vue', '.json'],
