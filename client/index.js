@@ -85,7 +85,8 @@ router.afterEach(() => {
 nenv.raw.router = router
 
 const platformStorage = (new StorageBuilder('platform', {
-  menus: Array
+  menus: Array,
+  layout: String
 })).storage
 
 // 声明空store
@@ -112,10 +113,18 @@ const store = new Store({
 
           }
         },
+        layouts: [],
+        layout: platformStorage.layout,
         acitveMenu: {},
         activeTopMenu: {}
       },
       mutations: {
+        ADD_LAYOUT: (state, layout) => {
+          state.layouts.push(layout)
+        },
+        CHANGE_LAYOUT: (state, layout) => {
+          platformStorage.layout = layout
+        },
         UPDATE_TITLE: (state, title) => {
           state.title = title
         },
@@ -146,6 +155,9 @@ const store = new Store({
         },
         async changeActiveTopMenu ({ commit, state }, menu) {
           commit('UPDATE_ACTIVE_TOP_MENU', menu || {})
+        },
+        async changePlatformLayout ({ commit, state }, layout) {
+          commit('CHANGE_LAYOUT', layout)
         },
         async theming ({ commit, state }, { classes, palette } = {}) {
 
@@ -239,6 +251,10 @@ export const loader = (options = {}) => {
   // 如果有布局 则注册布局
   if (layout) {
     // 声明组件是布局文件
+    nenv.raw.store.commit('platform/ADD_LAYOUT', {
+      label: layout.label,
+      name: layout.name
+    })
     nenv.layouts[layout.name] = layout
   }
 
@@ -317,7 +333,7 @@ export const getLayout = (name) => {
       throw new Error(`loaded layouts has no layout with name:${name}`)
     }
   } else {
-    name = Object.keys(layouts)[0]
+    name = platformStorage.layout || Object.keys(layouts)[0]
     return getLayout(name)
   }
 }
