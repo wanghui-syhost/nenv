@@ -34,8 +34,20 @@ Vue.prototype.$bus = bus
 
 Vue.use(Router)
 Vue.use(Vuex)
+
+ElementUI.Form.props.labelWidth = {
+  type: String,
+  default: '80px'
+}
+
+ElementUI.Form.props.labelPosition = {
+  type: String,
+  default: 'left'
+}
+
+console.log(ElementUI)
 Vue.use(ElementUI, {
-  size: 'medium'
+  size: 'nenv'
 })
 
 const buildId = ''
@@ -215,6 +227,7 @@ export const loader = (options = {}) => {
 
   // 如果有布局 则注册布局
   if (layout) {
+    // 声明组件是布局文件
     nenv.layouts[layout.name] = layout
   }
 
@@ -224,6 +237,7 @@ export const loader = (options = {}) => {
     router = options
   }
 
+  // 如果有路由
   if (router) {
     // 如果router的render属性是函数， 则认为是vue组件
     if (typeof router.render === 'function') {
@@ -234,10 +248,8 @@ export const loader = (options = {}) => {
           component: router
         }
       } else {
-        nenv.flatRoutes.push({path, component: router})
         router = {
           path,
-          component: getLayout(),
           children: [{
             path,
             component: router
@@ -265,15 +277,20 @@ function recursivelyProcessRoute (routes, { parent = '' } = {}) {
     router.meta = router.meta || {}
     router.meta['$parent'] = parent
 
-    //
+    // 如果有子路由
     if (router.children) {
-      // 如果有子路由但没有声明 组件,则自动注入组件
+      // 如果有子路由但没有声明不觉组件,则自动注入布局组件
       if (!router.component) {
         router.component = getLayout()
+      } else {
+        nenv.flatRoutes.push({ path: router.path, component: router.component })
       }
+
       recursivelyProcessRoute(router.children,
         { parent: `${parent}${router.path}` }
       )
+    } else {
+      nenv.flatRoutes.push({ path: router.path, component: router.component })
     }
   })
 }
