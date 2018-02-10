@@ -1,4 +1,4 @@
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 export default {
   name: 'Nenv',
   data () {
@@ -18,9 +18,9 @@ export default {
   computed: {
     ...mapState('platform', {
       title: state => state.title,
-      themePalette: state => state.theme.palette,
-      menus: state => state.menus
-    })
+      themePalette: state => state.theme.palette
+    }),
+    ...mapGetters('platform', ['menus'])
   },
   methods: {
     ...mapActions('platform', [

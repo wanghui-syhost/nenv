@@ -134,6 +134,7 @@ const store = new Store({
           const menus = (await platformFetchMenus({}, { headers: {
             Authorization: token
           }})).data
+
           commit('UPDATE_MENUS', menus)
         },
         async changeTitle ({ commit, state }, title) {
@@ -150,6 +151,15 @@ const store = new Store({
         },
         async logout ({ commit, state }) {
           // commit('DELETE_MENUS')
+        }
+      },
+      getters: {
+        menus (state) {
+          return [{
+            linkType: '1',
+            linkUrl: '/home',
+            menuName: '首页'
+          }].concat(state.menus)
         }
       }
     },
