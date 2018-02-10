@@ -71,6 +71,7 @@ const nenv = {
     StorageBuilder
   }
 }
+Vue.prototype.project = nenv.project
 
 router.beforeEach((to, from, next) => {
   Nprogress.start()
