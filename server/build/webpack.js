@@ -69,7 +69,9 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       }
     }
 
-    totalPages = pages.filter((p) => true).length
+    entries['bootstrap.js'] = join(__dirname, '..', '..', 'client', 'bootstrap')
+
+    totalPages = pages.filter((p) => true).length + 1
     return entries
   }
 

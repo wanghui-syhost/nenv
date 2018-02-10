@@ -366,11 +366,12 @@ nenv.loader = loader
 // }
 
 window.nenv = nenv
+nenv.bootstrap = mount
 export default async () => {
   console.log(`
 Version: ${nenv.version}
 Have a great day! 📣🐢
   `)
   console.log(logo)
-  mount()
+  //mount()
 }
