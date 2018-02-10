@@ -14,6 +14,7 @@ export default {
     styleEl.className += 'nenv-theme'
     head.appendChild(styleEl)
     this.styleEl = styleEl
+    this.activeMenus()
   },
   computed: {
     ...mapState('platform', {
@@ -23,18 +24,10 @@ export default {
     ...mapGetters('platform', ['menus'])
   },
   methods: {
-    ...mapActions('platform', [
-      'changeActiveMenu',
-      'changeActiveTopMenu'
-    ])
-  },
-  watch: {
-    title (val) {
-      this.titleEl.innerHTML = val
-    },
-    $route (route) {
+    activeMenus () {
       const self = this
       const { menus } = self
+      const route = this.$route
       const fullPath = route.fullPath.replace(/\?.*/, '')
       function find (menus) {
         for (const menu of menus) {
@@ -49,6 +42,18 @@ export default {
       }
 
       self.changeActiveTopMenu(find(menus))
+    },
+    ...mapActions('platform', [
+      'changeActiveMenu',
+      'changeActiveTopMenu'
+    ])
+  },
+  watch: {
+    title (val) {
+      this.titleEl.innerHTML = val
+    },
+    $route (route) {
+      this.activeMenus()
     }
   },
   render (h, props) {
