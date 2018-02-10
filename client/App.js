@@ -35,7 +35,7 @@ export default {
     $route (route) {
       const self = this
       const { menus } = self
-      const fullPath = route.fullPath
+      const fullPath = route.fullPath.replace(/\?.*/, '')
       function find (menus) {
         for (const menu of menus) {
           if (menu.linkUrl === fullPath) {
