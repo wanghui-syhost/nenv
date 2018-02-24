@@ -365,7 +365,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     output: {
       path: buildDir ? join(buildDir, '.nenv') : join(dir, config.distDir),
       filename: '[name]',
-      publicPath: config.assetPublicPath,
+      publicPath: dev ? '/' : config.assetPublicPath,
       strictModuleExceptionHandling: true,
       devtoolModuleFilenameTemplate ({ resourcePath }) {
         const hash = createHash('sha1')
