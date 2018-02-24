@@ -9,6 +9,7 @@ const defaultConfig = {
   poweredByHeader: true,
   distDir: '.nenv',
   assetPrefix: '',
+  assetPublicPath: '/',
   configOrigin: 'default',
   useFileSystemPublicRoutes: true,
   layoutsGlobPattern: 'layouts/**/*.+(js|vue)',

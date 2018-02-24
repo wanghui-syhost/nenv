@@ -1,4 +1,5 @@
 const babelRuntimePath = require.resolve('babel-runtime/package').replace(/[\\/]package\.json/, '')
+const relativeResolve = require('../root-module-relative-path')
 
 // function styled
 

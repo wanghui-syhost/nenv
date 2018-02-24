@@ -1,21 +1,22 @@
 const { resolve, join, sep } = require('path')
-const { realpathSync, existsSync } = require('fs')
 const { createHash } = require('crypto')
+const { realpathSync, existsSync } = require('fs')
 const webpack = require('webpack')
 const glob = require('glob-promise')
 const WriteFilePlugin = require('write-file-webpack-plugin')
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin')
 const CaseSensitivePathPlugin = require('case-sensitive-paths-webpack-plugin')
+const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
+const UnlinkFilePlugin = require('./plugins/unlink-file-plugin')
+const PagesPlugin = require('./plugins/pages-plugin')
 const HtmlWebpckPlugin = require('html-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin')
 
 const { styleLoaders, assetsPath } = require('./utils')
 const vueLoaderOptions = require('./vue-loader.conf')
 
-const PagesPlugin = require('./plugins/pages-plugin')
 const CombineAssetsPlugin = require('./plugins/combine-assets-plugin')
 const getConfig = require('../config')
 const babelCore = require('babel-core')
@@ -130,6 +131,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     plugins.push(
       new webpack.HotModuleReplacementPlugin(),
       new webpack.NoEmitOnErrorsPlugin(),
+      new UnlinkFilePlugin(),
       new HtmlWebpckPlugin({
         title: config.project.title,
         filename: 'index.html',
@@ -191,7 +193,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       {
         from: resolve(dir, 'static'),
         to: buildDir,
-        ignore: ['.*']
+        //ignore: ['.*']
       }
     ]))
   }
@@ -363,7 +365,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     output: {
       path: buildDir ? join(buildDir, '.nenv') : join(dir, config.distDir),
       filename: '[name]',
-      // publicPath: '/',
+      publicPath: config.assetPublicPath,
       strictModuleExceptionHandling: true,
       devtoolModuleFilenameTemplate ({ resourcePath }) {
         const hash = createHash('sha1')
