@@ -14,6 +14,7 @@ module.exports = class UnlinkFilePlugin {
       this.prevAssets = compilation.assets
 
       Promise.all(removed.map(async (f) => {
+        console.log(compilation.outputPath, f)
         const path = join(compilation.outputPath, f)
         try {
           await unlink(path)

@@ -131,7 +131,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     plugins.push(
       new webpack.HotModuleReplacementPlugin(),
       new webpack.NoEmitOnErrorsPlugin(),
-      new UnlinkFilePlugin(),
+      //new UnlinkFilePlugin(),
       new HtmlWebpckPlugin({
         title: config.project.title,
         filename: 'index.html',
