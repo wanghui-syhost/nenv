@@ -24,7 +24,6 @@ const findBabelConfig = require('./babel/find-config')
 const pkg = require('../../package')
 
 const defaultPages = [
-
 ]
 
 const nenvPagesDir = join(__dirname, '..', '..', 'pages')
@@ -48,6 +47,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
   const entry = async () => {
     const entries = {
       'main.js': [
+        'babel-polyfill',
         ...defaultEntries,
         ...config.clientBootstrap || [],
         mainJS,
@@ -134,6 +134,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       //new UnlinkFilePlugin(),
       new HtmlWebpckPlugin({
         title: config.project.title,
+        assetPublicPath: '/',
         filename: 'index.html',
         template: join(__dirname, '../../client', 'app.ejs'), // 'index.html',
         inject: true,
@@ -152,6 +153,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
   } else {
     plugins.push(new HtmlWebpckPlugin({
       title: config.project.title,
+      assetPublicPath: config.assetPublicPath,
       filename: 'index.html',
       template: join(__dirname, '../../client', 'app.ejs'),
       // template: join(__dirname, 'clent') ,//'index.html',
@@ -198,7 +200,6 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     ]))
   }
 
-  console.log(buildDir)
   const nodePathList = (process.env.NODE_PATH || '')
         .split(process.platform === 'win32' ? ';' : '')
         .filter((p) => !!p)
