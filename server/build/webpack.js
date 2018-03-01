@@ -192,12 +192,13 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     plugins.push(new CopyWebpackPlugin([
       {
         from: resolve(dir, 'static'),
-        to: buildDir,
-        //ignore: ['.*']
+        to: join(buildDir, '.nenv', 'static'),
+        ignore: ['.*']
       }
     ]))
   }
 
+  console.log(buildDir)
   const nodePathList = (process.env.NODE_PATH || '')
         .split(process.platform === 'win32' ? ';' : '')
         .filter((p) => !!p)

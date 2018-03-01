@@ -45,7 +45,6 @@ ElementUI.Form.props.labelPosition = {
   default: 'left'
 }
 
-console.log(ElementUI)
 Vue.use(ElementUI, {
   size: 'nenv'
 })
@@ -163,6 +162,7 @@ const store = new Store({
 
         },
         async logout ({ commit, state }) {
+          platformStorage.$clear(true)
           // commit('DELETE_MENUS')
         }
       },
@@ -354,17 +354,6 @@ nenv.platformStorage = platformStorage
 
 nenv.loader = loader
 
-// window.open = function open (flag) {
-//   if (flag) {
-//     window.confirm(`
-// Forbidden!!!
-// [window.open] may be blocked by browser, So platform ban this api
-// `)
-//   } else {
-//     return window.open()
-//   }
-// }
-
 window.nenv = nenv
 nenv.bootstrap = mount
 export default async () => {
@@ -373,5 +362,4 @@ Version: ${nenv.version}
 Have a great day! 📣🐢
   `)
   console.log(logo)
-  //mount()
 }
