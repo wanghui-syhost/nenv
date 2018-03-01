@@ -390,8 +390,8 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     },
     resolveLoader: {
       modules: [
-        nenvNodeModulesDir,
         'node_modules',
+        nenvNodeModulesDir,
         join(__dirname, 'loaders'),
         ...nodePathList
       ]
@@ -407,7 +407,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
 
   if (config.webpack) {
     console.log(`> Using "webpack" config function defined in ${config.configOrigin}.`)
-    webpackConfig = await config.webpack(webpackConfig, { dev })
+    webpackConfig = await config.webpack(webpackConfig, { dev }, webpack)
   }
   return webpack(webpackConfig)
 }

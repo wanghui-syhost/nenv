@@ -46,6 +46,7 @@
     "del": "^3.0.0",
     "download": "^6.2.5",
     "element-ui": "^2.0.10",
+    "es6-promise": "^4.2.4",
     "eslint": "^3.19.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-friendly-formatter": "^3.0.0",
