@@ -131,7 +131,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     plugins.push(
       new webpack.HotModuleReplacementPlugin(),
       new webpack.NoEmitOnErrorsPlugin(),
-      //new UnlinkFilePlugin(),
+      // new UnlinkFilePlugin(),
       new HtmlWebpckPlugin({
         title: config.project.title,
         assetPublicPath: '/',
@@ -400,7 +400,6 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     },
     plugins,
     module: {
-      // noParse: /es6/
       rules
     },
     devtool: dev ? 'cheap-module-inline-source-map' : false,
