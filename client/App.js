@@ -29,13 +29,15 @@ export default {
       const { menus } = self
       const route = this.$route
       const fullPath = route.fullPath.replace(/\?.*/, '')
-      function find (menus) {
+      function find (menus, parent) {
         for (const menu of menus) {
+          menu.crumbName = parent ? `${parent}/${menu.menuName}` : menu.menuName
           if (menu.linkUrl === fullPath) {
+            route.meta.$crumbName = menu.crumbName
             route.meta.$name = menu.menuName
             self.changeActiveMenu(menu)
             return menu
-          } else if (menu.childrens && find(menu.childrens)) {
+          } else if (menu.childrens && find(menu.childrens, menu.menuName)) {
             return menu
           }
         }
