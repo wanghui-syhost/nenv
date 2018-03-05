@@ -15,6 +15,8 @@ module.exports = (context, opts = {}) => ({
   plugins: [
     require.resolve('babel-plugin-transform-object-rest-spread'),
     require.resolve('babel-plugin-transform-class-properties'),
+    // require.resolve('babel-plugin-transform-vue-jsx"'),
+    // require.resolve('babel-helper-vue-jsx-merge-props'),
     require.resolve('babel-plugin-syntax-dynamic-import'),
     [require.resolve('babel-plugin-transform-runtime'), opts['transform-runtime'] || {}],
     [
