@@ -181,6 +181,7 @@ const store = new Store({
       namespaced: true,
       state: {
         token: localStorage.getItem('user.token'),
+        home: localStorage.getItem('user.home'),
         profile: JSON.parse(localStorage.getItem('user.profile') || '{}')
       },
       mutations: {
@@ -196,9 +197,9 @@ const store = new Store({
           localStorage.setItem('user.profile', JSON.stringify(profile))
           state.profile = profile
         },
-        'HOME_PATH': (state, homePath) => {
-          localStorage.setItem('user.homePath', homePath)
-          state.homePath = homePath
+        'UPDATE_HOME': (state, home) => {
+          localStorage.setItem('user.home', home)
+          state.home = home
         }
       },
       actions: {
@@ -206,7 +207,7 @@ const store = new Store({
           const {token, user, homePath} = (await userLogin(credential)).data
           await commit('UPDATE_TOKEN', token)
           await commit('UPDATE_PROFILE', user)
-          await commit('HOME_PATH', homePath)
+          await commit('UPDATE_HOME', homePath)
         },
         async logout ({ commit, dispatch }) {
           await userLogout()
