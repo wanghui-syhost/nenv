@@ -29,21 +29,26 @@ export default {
       const { menus } = self
       const route = this.$route
       const fullPath = route.fullPath.replace(/\?.*/, '')
-      function find (menus, parent) {
-        for (const menu of menus) {
-          menu.crumbName = parent ? `${parent}/${menu.menuName}` : menu.menuName
-          if (menu.linkUrl === fullPath) {
-            route.meta.$crumbName = menu.crumbName
-            route.meta.$name = menu.menuName
-            self.changeActiveMenu(menu)
-            return menu
-          } else if (menu.childrens && find(menu.childrens, menu.menuName)) {
-            return menu
+      // 查找fullPath
+      function findX (fullPath, menus) {
+        function find (menus, parent) {
+          for (const menu of menus) {
+            menu.crumbName = parent ? `${parent}/${menu.menuName}` : menu.menuName
+            if (menu.linkUrl === fullPath) {
+              route.meta.$crumbName = menu.crumbName
+              route.meta.$name = menu.menuName
+              self.changeActiveMenu(menu)
+              return menu
+            } else if (menu.childrens && find(menu.childrens, menu.menuName)) {
+              return menu
+            }
           }
         }
+        const result = find(menus)
+        return result || findX(fullPath.replace(/\/[^/]*$/, ''), menus)
       }
 
-      self.changeActiveTopMenu(find(menus))
+      self.changeActiveTopMenu(findX(fullPath, menus))
     },
     ...mapActions('platform', [
       'changeActiveMenu',
