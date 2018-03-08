@@ -45,7 +45,8 @@ export default {
           }
         }
         const result = find(menus)
-        return result || findX(fullPath.replace(/\/[^/]*$/, ''), menus)
+        const shortedPath = fullPath.replace(/\/[^/]*$/, '')
+        return result || (shortedPath ? findX(shortedPath, menus) : '')
       }
 
       self.changeActiveTopMenu(findX(fullPath, menus))
