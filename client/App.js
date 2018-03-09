@@ -73,6 +73,7 @@ export default {
     },
     $route (route) {
       this.activeMenus()
+      this.checkPermission()
     }
   },
   render (h, props) {
