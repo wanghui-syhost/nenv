@@ -195,6 +195,7 @@ const store = new Store({
       mutations: {
         'DELETE_TOKEN': (state) => {
           // localStorage
+          localStorage.removeItem('user.token')
           state.token = null
         },
         'UPDATE_TOKEN': (state, token) => {
