@@ -15,15 +15,26 @@ export default {
     head.appendChild(styleEl)
     this.styleEl = styleEl
     this.activeMenus()
+    this.checkPermission()
   },
   computed: {
     ...mapState('platform', {
       title: state => state.title,
       themePalette: state => state.theme.palette
     }),
+    ...mapState('user', {
+      token: state => state.token
+    }),
     ...mapGetters('platform', ['menus'])
   },
   methods: {
+    checkPermission () {
+      const self = this
+      const { token } = self
+      if (!token) {
+        return self.$router.push('/login')
+      }
+    },
     activeMenus () {
       const self = this
       const { menus } = self
