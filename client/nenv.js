@@ -1,4 +1,3 @@
-import 'es6-promise'
 import initNenv, * as nenv from './'
 
 // window.nenv = nenv

@@ -1,3 +1,4 @@
+import 'es6-promise'
 import Vue from 'vue'
 import Router from 'vue-router'
 import Vuex, { Store } from 'vuex'
@@ -104,6 +105,7 @@ const store = new Store({
       state: {
         title: document.getElementsByTagName('title')[0].innerHTML,
         menus: platformStorage.menus,
+        isHomeMenuShow: true,
         theme: {
           palette: {
             primaryColor: 'blue'
@@ -136,6 +138,9 @@ const store = new Store({
         },
         UPDATE_ACTIVE_MENU: (state, menu) => {
           state.acitveMenu = menu
+        },
+        UPDATE_HOME_MENU: (state, isShow) => {
+          state.isHomeMenuShow = isShow
         }
       },
       actions: {
@@ -145,6 +150,9 @@ const store = new Store({
           }})).data
 
           commit('UPDATE_MENUS', menus)
+        },
+        async enableHomeMenu ({ commit }, flag) {
+          commit('UPDATE_HOME_MENU', flag)
         },
         async changeTitle ({ commit, state }, title) {
           commit('UPDATE_TITLE', title)
@@ -168,11 +176,11 @@ const store = new Store({
       },
       getters: {
         menus (state) {
-          return [{
+          return state.isHomeMenuShow ? [{
             linkType: '1',
             linkUrl: '/home',
             menuName: '首页'
-          }].concat(state.menus)
+          }].concat(state.menus) : state.menus
         }
       }
     },
