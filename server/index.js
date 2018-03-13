@@ -49,7 +49,6 @@ module.exports = class Server {
   getProxy (dir, { quiet, conf } = { }) {
     let fn = (req, res, next) => next()
     try {
-      console.log(this.config)
       const proxyTable = this.config.proxy || {}
       console.log(proxyTable)
       Object.keys(proxyTable).forEach((context) => {
