@@ -13,7 +13,8 @@ module.exports = {
       options: {
         babelrc: false,
         cacheDirectory: true,
-        presets: [require.resolve('./babel/preset')]
+        // presets: [require.resolve('./babel/preset')]
+        ...require('./babel/preset')()
       }
     },
     ...utils.cssLoaders({

@@ -282,7 +282,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
                     alias: {
                       'babel-runtime': babelRuntimePath,
                       'nenv/mixins/inputerMixins': relativeResolve('../../mixins/inputerMixins'),
-                      'nenv/unfetch': relativeResolve('../../lib/unfetch')
+                      'nenv/lib/unfetch': relativeResolve('../../lib/unfetch')
                     }
                   }
                 ]

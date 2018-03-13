@@ -28,7 +28,7 @@ module.exports = (context, opts = {}) => ({
         alias: {
           'babel-runtime': babelRuntimePath,
           'nenv/mixins/inputerMixins': relativeResolve('../../../mixins/inputerMixins'),
-          'nenv/unfetch': relativeResolve('../../../lib/unfetch')
+          'nenv/lib/unfetch': relativeResolve('../../../lib/unfetch')
         }
       }
     ]
