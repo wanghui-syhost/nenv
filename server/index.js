@@ -50,7 +50,6 @@ module.exports = class Server {
     let fn = (req, res, next) => next()
     try {
       const proxyTable = this.config.proxy || {}
-      console.log(proxyTable)
       Object.keys(proxyTable).forEach((context) => {
         let options = proxyTable[context]
         if (typeof options === 'string') {
