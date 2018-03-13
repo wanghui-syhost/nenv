@@ -387,7 +387,8 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       alias: {
         vue$: 'vue/dist/vue.esm.js',
         '@layouts': join(dir, 'layouts'),
-        '@modules': join(dir, 'modules')
+        '@modules': join(dir, 'modules'),
+        '@packages': join(dir, 'pakcages')
       },
       modules: [
         nenvNodeModulesDir,
