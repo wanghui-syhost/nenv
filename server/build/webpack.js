@@ -21,6 +21,7 @@ const CombineAssetsPlugin = require('./plugins/combine-assets-plugin')
 const getConfig = require('../config')
 const babelCore = require('babel-core')
 const findBabelConfig = require('./babel/find-config')
+const rootModuleRelativePath = require('./root-module-relative-path')
 const pkg = require('../../package')
 
 const defaultPages = [
@@ -31,6 +32,8 @@ const nenvNodeModulesDir = join(__dirname, '..', '..', 'node_modules')
 const interpolateNames = new Map(defaultPages.map((p) => {
   return [join(nenvPagesDir, p), `dist/pages/${p}`]
 }))
+
+const relativeResolve = rootModuleRelativePath(require)
 
 module.exports = async function createCompiler (dir, { dev = false, quiet = false, buildDir, conf = null } = {}) {
   dir = realpathSync(resolve(dir))
@@ -277,7 +280,9 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
                   require.resolve('babel-plugin-module-resolver'),
                   {
                     alias: {
-                      'babel-runtime': babelRuntimePath
+                      'babel-runtime': babelRuntimePath,
+                      'nenv/mixins/inputerMixins': relativeResolve('../../mixins/inputerMixins'),
+                      'nenv/unfetch': relativeResolve('../../lib/unfetch')
                     }
                   }
                 ]

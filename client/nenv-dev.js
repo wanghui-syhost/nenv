@@ -37,7 +37,7 @@ const devPane = {
             staticClass: 'dev-main'
           },
           [
-            
+
           ]
         ) : null
       ]

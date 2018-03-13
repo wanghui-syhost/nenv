@@ -5,7 +5,7 @@ module.exports = function findBabelConfig (dir) {
   const filename = join(dir, 'filename.js')
   const options = { babelr: true, filename }
 
-  const configList = buildConfigChain(options).filter(i => i.doc !== 'base')
+  const configList = buildConfigChain(options).filter(i => i.loc !== 'base')
 
   return configList[0]
 }

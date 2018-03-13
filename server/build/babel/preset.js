@@ -1,5 +1,5 @@
 const babelRuntimePath = require.resolve('babel-runtime/package').replace(/[\\/]package\.json/, '')
-const relativeResolve = require('../root-module-relative-path')
+const relativeResolve = require('../root-module-relative-path')(require)
 
 // function styled
 
@@ -10,7 +10,9 @@ module.exports = (context, opts = {}) => ({
       useBuildIns: true,
       ...opts['preset-env']
     }],
-    [require.resolve('babel-preset-stage-2')]
+    require.resolve('babel-preset-es2015'),
+    require.resolve('babel-preset-stage-2'),
+    require.resolve('babel-preset-vue-app')
   ],
   plugins: [
     require.resolve('babel-plugin-transform-es2015-modules-commonjs'),
@@ -24,7 +26,9 @@ module.exports = (context, opts = {}) => ({
       require.resolve('babel-plugin-module-resolver'),
       {
         alias: {
-          'babel-runtime': babelRuntimePath
+          'babel-runtime': babelRuntimePath,
+          'nenv/mixins/inputerMixins': relativeResolve('../../../mixins/inputerMixins'),
+          'nenv/unfetch': relativeResolve('../../../lib/unfetch')
         }
       }
     ]
