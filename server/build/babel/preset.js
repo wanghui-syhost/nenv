@@ -13,6 +13,7 @@ module.exports = (context, opts = {}) => ({
     [require.resolve('babel-preset-stage-2')]
   ],
   plugins: [
+    require.resolve('babel-plugin-transform-es2015-modules-commonjs'),
     require.resolve('babel-plugin-transform-object-rest-spread'),
     require.resolve('babel-plugin-transform-class-properties'),
     // require.resolve('babel-plugin-transform-vue-jsx"'),
