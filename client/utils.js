@@ -1,4 +1,4 @@
-export const rules = {
+﻿export const rules = {
   // 5-20位以字母开头，字母，数字，减号，下划线
   username: /^[a-zA-Z]([-_a-zA-Z0-9]{4,19})+$/,
   password: /^[a-zA-Z0-9_-]{6,20}$/,

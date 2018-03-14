@@ -322,7 +322,10 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         include: [nenvDir],
         exclude (str) {
           // console.log(str)
-          console.log(str, /node_modules/.test(str.replace(nenvDir, '')))
+          if (!/node_modules/.test(str.replace(nenvDir, ''))) {
+            console.log(str, /node_modules/.test(str.replace(nenvDir, '')))
+          }
+          
           return /node_modules/.test(str.replace(nenvDir, ''))
         },
         options: {
