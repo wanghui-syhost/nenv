@@ -27,6 +27,8 @@ const pkg = require('../../package')
 const defaultPages = [
 ]
 
+const nenvDir = join(__dirname, '..', '..')
+
 const nenvPagesDir = join(__dirname, '..', '..', 'pages')
 const nenvNodeModulesDir = join(__dirname, '..', '..', 'node_modules')
 const interpolateNames = new Map(defaultPages.map((p) => {
@@ -317,12 +319,11 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        // include: [dir],
+        include: [nenvDir],
         exclude (str) {
           // console.log(str)
-          return (/node_modules/.test(str) &&
-            str.indexOf(join(__dirname, '..', '..')) !== 0) ||
-            (str.indexOf(join(__dirname, '..', '..', 'node_modules')) === 0)
+          console.log(str, /node_modules/.test(str.replace(nenvDir, '')))
+          return /node_modules/.test(str.replace(nenvDir, ''))
         },
         options: {
           //
@@ -353,17 +354,17 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         options: {
           name: 'videos/[name].[hash:7].[ext]'
         }
+      },
+      // 项目目录的 babel loader
+      {
+        test: /\.js(\?[^?]*)?$/,
+        loader: 'babel-loader',
+        include: [dir],
+        exclude (str) {
+          return /node_modules/.test(str)
+        },
+        options: mainBabelOptions
       }
-      // ,
-      // {
-      //   test: /\.(js|vue)(\?[^?]*)?$/,
-      //   loader: 'babel-loader',
-      //   include: [dir],
-      //   exclude (str) {
-
-      //   },
-      //   options: mainBabelOptions
-      // }
     ])
 
   let webpackConfig = {
