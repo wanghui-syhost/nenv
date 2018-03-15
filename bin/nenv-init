@@ -67,7 +67,7 @@ function downloadAndGengerate (template) {
   const downloadUrl = `http://192.168.37.5/${template}/repository/archive.zip?ref=master`
   download(downloadUrl, tmp, { extract: true, strip: 1, mode: '666', headers: { accept: 'application/zip' } })
   .then(() => {
-    generate(name, tmp, dir, err => {
+    generate(name, tmp, join(dir, name), err => {
       if (err) {
         printAndExit(err)
       }
