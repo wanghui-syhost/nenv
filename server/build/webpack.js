@@ -321,11 +321,6 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         loader: 'babel-loader',
         include: [nenvDir],
         exclude (str) {
-          // console.log(str)
-          if (!/node_modules/.test(str.replace(nenvDir, ''))) {
-            console.log(str, /node_modules/.test(str.replace(nenvDir, '')))
-          }
-          
           return /node_modules/.test(str.replace(nenvDir, ''))
         },
         options: {
