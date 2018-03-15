@@ -43,6 +43,12 @@ exports.cssLoaders = function (options) {
       })
     }
 
+    if (loader === 'sass') {
+      loaders.push({
+        loader: 'nenv-sass-loader'
+      })
+    }
+
     // Extract CSS when that option is specified
     // (which is the case during production build)
     if (options.extract) {
