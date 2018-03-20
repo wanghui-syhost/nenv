@@ -44,13 +44,17 @@ export default {
       function findX (fullPath, menus) {
         function find (menus, parent) {
           for (const menu of menus) {
-            menu.crumbName = parent ? `${parent}/${menu.menuName}` : menu.menuName
+            menu.crumbName = parent ? `${parent.menuName}/${menu.menuName}` : menu.menuName
+            menu.parents = menu.parents || []
+            if (parent && (menu.parents.indexOf(parent) < 0)) {
+              menu.parents.push(parent)
+            }
             if (menu.linkUrl === fullPath) {
               route.meta.$crumbName = menu.crumbName
               route.meta.$name = menu.menuName
               self.changeActiveMenu(menu)
               return menu
-            } else if (menu.childrens && find(menu.childrens, menu.menuName)) {
+            } else if (menu.childrens && find(menu.childrens, menu)) {
               return menu
             }
           }
