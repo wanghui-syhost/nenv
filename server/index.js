@@ -22,7 +22,7 @@ module.exports = class Server {
     this.hotReloader = this.getHotReloader(this.dir, { quiet, conf })
     this.config = getConfig(this.dir, conf)
     this.mocker = this.getMock(this.dir, { quiet, conf })
-    this.proxy = this.getProxy(this.dir, { quiet, conf })
+    this.proxies = this.getProxies(this.dir, { quiet, conf })
     this.http = null
     this.dist = this.config.distDir
     this.app = express()
@@ -46,8 +46,8 @@ module.exports = class Server {
     return this.handleRequest.bind(this)
   }
 
-  getProxy (dir, { quiet, conf } = { }) {
-    let fn = (req, res, next) => next()
+  getProxies (dir, { quiet, conf } = { }) {
+    const fns = [(req, res, next) => next()]
     try {
       const proxyTable = this.config.proxy || {}
       Object.keys(proxyTable).forEach((context) => {
@@ -55,12 +55,12 @@ module.exports = class Server {
         if (typeof options === 'string') {
           options = { target: options }
         }
-        fn = proxyMiddleware(options.filter || context, options)
+        fns.push(proxyMiddleware(options.filter || context, options))
       })
-      return fn
+      return fns
     } catch (e) {
       console.log(e)
-      return fn
+      return fns
     }
   }
 
@@ -150,7 +150,10 @@ module.exports = class Server {
 
     this.app.use(this.mocker)
 
-    this.app.use(this.proxy)
+    this.proxies.map((proxy) => {
+      this.app.use(proxy)
+    })
+    // this.app.use(this.proxy)
 
     this.app.use(historyApiFallbackMiddleware())
 

@@ -19,6 +19,7 @@ const defaultCommand = 'dev'
 const commands = new Set([
   'init',
   'build',
+  'update',
   defaultCommand
 ])
 

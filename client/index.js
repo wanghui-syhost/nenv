@@ -73,6 +73,12 @@ const nenv = {
 }
 Vue.prototype.project = nenv.project
 
+Vue.directive('nv-direct', {
+  bind () {
+    console.log(arguments, 'xxx')
+  }
+})
+
 router.beforeEach((to, from, next) => {
   Nprogress.start()
   next()
