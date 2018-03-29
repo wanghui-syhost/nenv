@@ -67,17 +67,12 @@ const nenv = {
   flatRoutes: [],
   routes: [],
   pageLoader: pageLoader,
+  i18n: null,
   lib: {
     StorageBuilder
   }
 }
 Vue.prototype.project = nenv.project
-
-Vue.directive('nv-direct', {
-  bind () {
-    console.log(arguments, 'xxx')
-  }
-})
 
 router.beforeEach((to, from, next) => {
   Nprogress.start()
@@ -253,7 +248,7 @@ export const loader = (options = {}) => {
   // console.log(options)
 
   // routerDepth 用来表明页面的路由深度
-  let { layout, store, router, path, routerDepth } = options
+  let { layout, store, i18n, router, path, routerDepth } = options
 
   // 如果有store 则注册store
   if (store) {
@@ -272,6 +267,11 @@ export const loader = (options = {}) => {
       name: layout.name
     })
     nenv.layouts[layout.name] = layout
+  }
+
+  // 如果有翻译器
+  if (i18n) {
+    nenv.i18n = i18n
   }
 
   // 如果options的render是函数，则认为options 是路由文件
@@ -355,13 +355,14 @@ export const getLayout = (name) => {
 }
 
 export const mount = () => {
-  const { raw } = nenv
+  const { raw, i18n } = nenv
   raw.router = router
   raw.store = store
   raw.root = new Vue({
     el: '#nenv',
     router,
     store,
+    i18n,
     render: h => h(App)
   })
 }
