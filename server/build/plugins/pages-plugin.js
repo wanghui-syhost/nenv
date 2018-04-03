@@ -14,7 +14,7 @@ class PageChunlTemplatePlugin {
         routeName = routeName.replace(/\\/g, '/')
       }
 
-      routeName = `/${routeName.replace(/(^|\/)index$/, '')}`
+      routeName = `/${routeName.replace(/(^|\/)index$/, '').replace('_', ':')}`
 
       const source = new ConcatSource()
       source.add(`
