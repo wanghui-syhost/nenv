@@ -21,6 +21,8 @@ import { StorageBuilder } from '../lib/storage'
 
 import App from './App'
 
+import '../lib/i18n'
+
 import { userLogin, userLogout, platformFetchMenus } from './api'
 // import utils from './utils'
 
