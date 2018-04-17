@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import { existsSync } from 'fs'
-
+const { existsSync } = require('fs')
 const download = require('download')
 const { resolve, join } = require('path')
 const parseArgs = require('minimist')
 const home = require('user-home')
 const { printAndExit } = require('../lib/utils')
+const generate = require('../lib/generate')
 const del = require('del')
 
 const argv = parseArgs(process.argv.slice(2), {
@@ -45,7 +45,7 @@ const tmp = join(home, '.nenv-templates')
 
 function run () {
   const officalTempate = 'nenv/nv-template'
-  const parts = part === 'all' ? ['layout', 'layouts'] : [part]
+  const parts = part === 'all' ? ['layouts', 'packages', 'modules'] : [part]
   downloadAndUpdate(officalTempate, parts)
 }
 
@@ -55,7 +55,13 @@ function downloadAndUpdate (template, parts) {
   download(downloadUrl, tmp, { extract: true, strip: 1, mode: '666', headers: { accept: 'application/zip' } })
   .then(() => {
     parts.forEach(part => {
-
+      console.log(dir, part)
+      del(join(dir, part))
+      generate(parts, join(tmp, part), join(dir, part), err => {
+        if (err) {
+          printAndExit(err)
+        }
+      })
     })
   })
   .catch((err) => {
