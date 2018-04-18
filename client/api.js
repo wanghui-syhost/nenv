@@ -1,4 +1,12 @@
 import unfetch from '../lib/unfetch'
+
+export function tokenLogin (params) {
+  return unfetch({
+    url: 'user/info',
+    method: 'get'
+  })
+}
+
 export function userLogin (params) {
   return unfetch({
     url: 'user/login',

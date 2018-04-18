@@ -12,7 +12,7 @@ import '../styles/nenv.scss'
 import PageLoader from '../lib/page-loader'
 import unfetch from '../lib/unfetch'
 
-// import * as filters from '../lib/filters'
+import * as filters from '../lib/filters'
 import router from '../lib/router'
 
 import logo from '../lib/logo'
@@ -29,7 +29,7 @@ import { userLogin, userLogout, platformFetchMenus } from './api'
 window.unfetch = unfetch
 
 // 全局注册filters
-// Object.keys(filters).forEach(x => Vue.filter(x, filters[x]))
+Object.keys(filters).forEach(x => Vue.filter(x, filters[x]))
 
 Vue.prototype.$unfetch = unfetch
 const bus = new Vue()
