@@ -1,3 +1,10 @@
+
+Vue.directive('nv-view', {
+  update () {
+    console.log(arguments)
+  }
+})
+
 export default {
   props: {
     disabled: {

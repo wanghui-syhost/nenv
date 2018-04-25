@@ -52,6 +52,21 @@ Vue.use(ElementUI, {
   size: 'nenv'
 })
 
+Vue.directive('nv-view', {
+  bind (el, binding, vnode) {
+    const { modifiers } = binding
+    if (modifiers.display) {
+      el.style.display = router.app.$route.query['nv-view'] === 'true' ? 'none' : ''
+    }
+  },
+  update (el, binding) {
+    const { modifiers } = binding
+    if (modifiers.display) {
+      el.style.display = router.app.$route.query['nv-view'] === 'true' ? 'none' : ''
+    }
+  }
+})
+
 const buildId = ''
 const assetPrefix = ''
 const pageLoader = new PageLoader(buildId, assetPrefix)
