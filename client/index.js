@@ -48,6 +48,21 @@ ElementUI.Form.props.labelPosition = {
   default: 'left'
 }
 
+ElementUI.Dialog.mixins.push({
+  watch: {
+    visible (val) {
+      if (val) {
+        this.$nextTick(() => {
+          const vComp = this.$children[0].$children[0]
+          if (vComp && vComp.isDynamicView !== undefined) {
+            vComp.isDynamicView = true
+          }
+        })
+      }
+    }
+  }
+})
+
 Vue.use(ElementUI, {
   size: 'nenv'
 })
