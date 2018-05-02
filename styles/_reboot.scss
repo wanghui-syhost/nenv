@@ -2,6 +2,10 @@
 
 @import 'png-icon.scss';
 
+body {
+    overflow-y: scroll;
+}
+
 a {
     text-decoration: none;
     background-color: transparent;
