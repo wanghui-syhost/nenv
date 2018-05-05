@@ -48,6 +48,11 @@ ElementUI.Form.props.labelPosition = {
   default: 'left'
 }
 
+ElementUI.FormItem.props.nvLayout = {
+  type: String,
+  default: 'half'
+}
+
 ElementUI.Dialog.mixins.push({
   watch: {
     visible (val) {
