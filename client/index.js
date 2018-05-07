@@ -325,14 +325,16 @@ export const loader = (options = {}) => {
       if (routerDepth === 0) {
         router = {
           path,
-          component: router
+          component: router,
+          meta: router.meta || {}
         }
       } else {
         router = {
           path,
           children: [{
             path,
-            component: router
+            component: router,
+            meta: router.meta || {}
           }]
         }
       }
