@@ -29,7 +29,10 @@ import { userLogin, userLogout, platformFetchMenus } from './api'
 window.unfetch = unfetch
 
 // 全局注册filters
-Object.keys(filters).forEach(x => Vue.filter(x, filters[x]))
+Object.keys(filters).forEach(x => {
+  Vue.filter(x, filters[x])
+  Vue.prototype[x] = filters[x]
+})
 
 Vue.prototype.$unfetch = unfetch
 const bus = new Vue()
@@ -52,6 +55,8 @@ ElementUI.FormItem.props.nvLayout = {
   type: String,
   default: 'half'
 }
+
+ElementUI.Dialog.props.top.default = '10vh'
 
 ElementUI.Dialog.mixins.push({
   watch: {
