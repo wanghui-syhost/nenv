@@ -40,12 +40,12 @@ Vue.use(Vuex)
 
 ElementUI.Form.props.labelWidth = {
   type: String,
-  default: '80px'
+  default: '86px'
 }
 
 ElementUI.Form.props.labelPosition = {
   type: String,
-  default: 'left'
+  default: 'right'
 }
 
 ElementUI.FormItem.props.nvLayout = {
