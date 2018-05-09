@@ -58,6 +58,15 @@ ElementUI.FormItem.props.nvLayout = {
 
 ElementUI.Dialog.props.top.default = '10vh'
 
+ElementUI.Dialog.props.width = {
+  type: String,
+  default: '65%'
+}
+
+// ElementUI.Dialog.props.appendToBody.default = true
+
+ElementUI.TableColumn.props.showOverflowTooltip.default = true
+
 ElementUI.Dialog.mixins.push({
   watch: {
     visible (val) {
@@ -160,7 +169,10 @@ const store = new Store({
         layouts: [],
         layout: platformStorage.layout,
         acitveMenu: {},
-        activeTopMenu: {}
+        activeTopMenu: {},
+        persmissons: {
+          urls: {}
+        }
       },
       mutations: {
         ADD_LAYOUT: (state, layout) => {
@@ -184,6 +196,14 @@ const store = new Store({
         },
         UPDATE_HOME_MENU: (state, isShow) => {
           state.isHomeMenuShow = isShow
+        },
+        ADD_PERMISSION_URL: (state, urls = []) => {
+          if (!Array.isArray(urls)) {
+            urls = [urls]
+          }
+          urls.forEach(url => {
+            state.persmissons.url.push(url)
+          })
         }
       },
       actions: {
@@ -191,6 +211,20 @@ const store = new Store({
           const menus = (await platformFetchMenus({}, { headers: {
             Authorization: token
           }})).data
+
+          function loop (menus, urls = []) {
+            for (let menu of menus) {
+              if (menu.linkUrl) {
+                urls.push(menus.linkUrl)
+              } else {
+  
+              }
+            }
+
+            return urls
+          }
+
+          // commit('ADD_PERMISSION_URL', loop(menus))
 
           commit('UPDATE_MENUS', menus)
         },
