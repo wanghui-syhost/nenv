@@ -453,6 +453,7 @@ router.beforeEach((to, from, next) => {
   if (meta['nvPermisson'] === false || urls[fullPath]) {
     next()
   } else {
+    console.log(`url[${to.fullPath}]被平台权限系统拦截`)
     next('/err401')
   }
 })
