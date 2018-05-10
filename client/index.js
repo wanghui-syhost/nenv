@@ -138,7 +138,8 @@ nenv.raw.router = router
 
 const platformStorage = (new StorageBuilder('platform', {
   menus: Array,
-  layout: String
+  layout: String,
+  persmissons: JSON
 })).storage
 
 // 声明空store
@@ -170,9 +171,9 @@ const store = new Store({
         layout: platformStorage.layout,
         acitveMenu: {},
         activeTopMenu: {},
-        persmissons: {
+        persmissons: Object.assign({
           urls: {}
-        }
+        }, platformStorage.persmissons)
       },
       mutations: {
         ADD_LAYOUT: (state, layout) => {
@@ -202,8 +203,12 @@ const store = new Store({
             urls = [urls]
           }
           urls.forEach(url => {
-            state.persmissons.url.push(url)
+            let paths = {}
+            paths[url] = true
+            Object.assign(state.persmissons.urls, paths )
+            state.persmissons.urls[url] = true
           })
+          platformStorage.persmissons = state.persmissons
         }
       },
       actions: {
@@ -215,17 +220,15 @@ const store = new Store({
           function loop (menus, urls = []) {
             for (let menu of menus) {
               if (menu.linkUrl) {
-                urls.push(menus.linkUrl)
-              } else {
-  
+                urls.push(menu.linkUrl)
+              }
+              if (menu.childrens) {
+                loop(menu.childrens, urls)
               }
             }
-
             return urls
           }
-
-          // commit('ADD_PERMISSION_URL', loop(menus))
-
+          await commit('ADD_PERMISSION_URL', loop(menus))
           commit('UPDATE_MENUS', menus)
         },
         async enableHomeMenu ({ commit }, flag) {
@@ -248,16 +251,28 @@ const store = new Store({
         },
         async logout ({ commit, state }) {
           platformStorage.$clear(true)
-          // commit('DELETE_MENUS')
         }
       },
       getters: {
         menus (state) {
+          function loop (menus) {
+            const filteredMenus = []
+            for (let menu of menus) {
+              if (menu.isShow !== false) {
+                if (menu.childrens) {
+                  menu.childrens = loop(menu.childrens)
+                }
+                filteredMenus.push(menu)
+              }
+            }
+            return filteredMenus
+          }
+          const menus = JSON.parse(JSON.stringify(state.menus))
           return state.isHomeMenuShow ? [{
             linkType: '1',
             linkUrl: '/home',
             menuName: '首页'
-          }].concat(state.menus) : state.menus
+          }].concat(loop(menus)) : loop(menus)
         }
       }
     },
@@ -431,6 +446,17 @@ export const getLayout = (name) => {
     return getLayout(name)
   }
 }
+
+router.beforeEach((to, from, next) => {
+  const urls = store.state.platform.persmissons.urls
+  console.log(to)
+  const { fullPath, meta } = to
+  if (meta['nvPermisson'] === false || urls[fullPath]) {
+    next()
+  } else {
+    next('/err401')
+  }
+})
 
 export const mount = () => {
   const { raw, i18n } = nenv
