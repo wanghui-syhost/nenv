@@ -449,7 +449,6 @@ export const getLayout = (name) => {
 
 router.beforeEach((to, from, next) => {
   const urls = store.state.platform.persmissons.urls
-  console.log(to)
   const { fullPath, meta } = to
   if (meta['nvPermisson'] === false || urls[fullPath]) {
     next()
