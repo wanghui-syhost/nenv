@@ -450,7 +450,7 @@ export const getLayout = (name) => {
 router.beforeEach((to, from, next) => {
   const urls = store.state.platform.persmissons.urls
   const { path, meta } = to
-  if (meta['nvPermisson'] === false || urls[path]) {
+  if (meta['nvPermission'] === false || urls[path]) {
     next()
   } else {
     console.log(`url[${to.path}]被平台权限系统拦截`)
