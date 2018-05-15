@@ -23,7 +23,7 @@ import App from './App'
 
 import '../lib/i18n'
 
-import { userLogin, userLogout, platformFetchMenus } from './api'
+import { userLogin, userLogout, platformFetchMenus, tokenLogin } from './api'
 // import utils from './utils'
 
 window.unfetch = unfetch
@@ -313,7 +313,18 @@ const store = new Store({
         async logout ({ commit, dispatch }) {
           await userLogout()
           commit('DELETE_TOKEN')
-        }
+        }, 
+        async ssoLogin ({commit, dispatch}, credential) {
+          localStorage.removeItem('user.token')
+          const {user, homePath} = (await tokenLogin({'Authorization':credential.token})).data
+          await commit('UPDATE_TOKEN', credential.token)
+          await commit('UPDATE_PROFILE', user)
+          await commit('UPDATE_HOME', homePath)
+
+         let url = localStorage.getItem('unfetch.redirect')
+        //nenv.bus.$emit('ssoLogin')
+        window.location.href=url
+        },
       }
     }
   },
@@ -326,7 +337,11 @@ const store = new Store({
       await dispatch('user/logout')
       await dispatch('platform/logout')
       nenv.bus.$emit('on-logout')
-    }
+    },
+    async userInfo ({ commit, dispatch, state }, token) {
+      await dispatch('user/ssoLogin', { token: token })
+      await dispatch('platform/fetchMenus', { token: token })
+    },
   }
 })
 nenv.raw.store = store
