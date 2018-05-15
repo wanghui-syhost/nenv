@@ -5,7 +5,7 @@ import Vuex, { Store } from 'vuex'
 import ElementUI from 'element-ui'
 import Nprogress from 'nprogress'
 
-import 'element-ui/lib/theme-chalk/index.css'
+// import 'element-ui/lib/theme-chalk/index.css'
 import 'normalize.css/normalize.css'
 import '../styles/nenv.scss'
 
@@ -161,7 +161,7 @@ const store = new Store({
         isHomeMenuShow: true,
         theme: {
           palette: {
-            primaryColor: 'blue'
+            primaryColor: '#7B2DE3'
           },
           classes: {
 
@@ -197,6 +197,9 @@ const store = new Store({
         },
         UPDATE_HOME_MENU: (state, isShow) => {
           state.isHomeMenuShow = isShow
+        },
+        UPDATE_THEME: (state, { classes, palette }) => {
+          state.theme.palette = Object.assign(state.theme.palette, palette)
         },
         ADD_PERMISSION_URL: (state, urls = []) => {
           if (!Array.isArray(urls)) {
@@ -247,7 +250,7 @@ const store = new Store({
           commit('CHANGE_LAYOUT', layout)
         },
         async theming ({ commit, state }, { classes, palette } = {}) {
-
+          commit('UPDATE_THEME', { classes, palette })
         },
         async logout ({ commit, state }) {
           platformStorage.$clear(true)

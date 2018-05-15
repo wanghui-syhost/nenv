@@ -1,10 +1,15 @@
 import { mapState, mapActions, mapGetters } from 'vuex'
+import generateColors from '../lib/color'
 export default {
   name: 'Nenv',
   data () {
     return {
       styleEl: null,
-      titleEl: document.getElementsByTagName('title')[0]
+      originalStyle: '',
+      colors: {
+        primary: '#409eff'
+      },
+      inited: false
     }
   },
   created () {
@@ -14,6 +19,7 @@ export default {
     styleEl.className += 'nenv-theme'
     head.appendChild(styleEl)
     this.styleEl = styleEl
+    this.getIndexStyle()
     this.activeMenus()
     this.checkPermission()
   },
@@ -66,6 +72,54 @@ export default {
 
       self.changeActiveTopMenu(findX(fullPath, menus))
     },
+    getStyleTemplate (data) {
+      const colorMap = {
+        '#3a8ee6': 'shade-1',
+        '#409eff': 'primary',
+        '#53a8ff': 'light-1',
+        '#66b1ff': 'light-2',
+        '#79bbff': 'light-3',
+        '#8cc5ff': 'light-4',
+        '#a0cfff': 'light-5',
+        '#b3d8ff': 'light-6',
+        '#c6e2ff': 'light-7',
+        '#d9ecff': 'light-8',
+        '#ecf5ff': 'light-9'
+      }
+      Object.keys(colorMap).forEach(key => {
+        const value = colorMap[key]
+        data = data.replace(new RegExp(key, 'ig'), value)
+      })
+      return data
+    },
+    getIndexStyle () {
+      const self = this
+      window.unfetch({
+        method: 'GET',
+        baseURL: '/',
+        url: '/static/theme-nenv/index.css',
+        responseType: 'text'
+      }).then(({data}) => {
+        self.originalStyle = self.getStyleTemplate(data)
+        self.colors.primary = self.themePalette.primaryColor
+        self.writeNewStyle()
+        self.$nextTick(() => {
+          setTimeout(() => {
+            self.inited = true
+          }, 100)
+        })
+      }).catch(e => {
+        console.log(e)
+      })
+    },
+    writeNewStyle () {
+      let cssText = this.originalStyle
+      this.colors = Object.assign({}, this.colors, generateColors(this.colors.primary))
+      Object.keys(this.colors).forEach(key => {
+        cssText = cssText.replace(new RegExp('(:|\\s+)' + key, 'g'), '$1' + this.colors[key])
+      })
+      this.styleEl.innerText = cssText
+    },
     ...mapActions('platform', [
       'changeActiveMenu',
       'changeActiveTopMenu'
@@ -78,13 +132,18 @@ export default {
     $route (route) {
       this.activeMenus()
       this.checkPermission()
+    },
+    'themePalette.primaryColor' (val) {
+      this.colors.primary = val
+      this.writeNewStyle()
     }
   },
   render (h, props) {
     return h('div', {
       domProps: {
         id: 'nenv_root'
-      }
+      },
+      style: { opacity: this.inited ? '' : 0 }
     }, [h('router-view')])
   }
 }
