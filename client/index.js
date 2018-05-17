@@ -63,9 +63,10 @@ ElementUI.Dialog.props.width = {
   default: '65%'
 }
 
-// ElementUI.Dialog.props.appendToBody.default = true
-
-ElementUI.TableColumn.props.showOverflowTooltip.default = true
+ElementUI.TableColumn.props.showOverflowTooltip = {
+  type: Boolean,
+  default: true
+}
 
 ElementUI.Dialog.mixins.push({
   watch: {
@@ -139,7 +140,8 @@ nenv.raw.router = router
 const platformStorage = (new StorageBuilder('platform', {
   menus: Array,
   layout: String,
-  persmissons: JSON
+  persmissons: JSON,
+  theme: JSON
 })).storage
 
 // 声明空store
@@ -161,7 +163,12 @@ const store = new Store({
         isHomeMenuShow: true,
         theme: {
           palette: {
-            primaryColor: '#7B2DE3'
+            ...Object.assign(
+              {
+                primaryColor: '#7B2DE3'
+              },
+              (platformStorage.theme || {}).palette
+            )
           },
           classes: {
 
@@ -200,6 +207,7 @@ const store = new Store({
         },
         UPDATE_THEME: (state, { classes, palette }) => {
           state.theme.palette = Object.assign(state.theme.palette, palette)
+          platformStorage.theme = state.theme
         },
         ADD_PERMISSION_URL: (state, urls = []) => {
           if (!Array.isArray(urls)) {
@@ -276,6 +284,22 @@ const store = new Store({
             linkUrl: '/home',
             menuName: '首页'
           }].concat(loop(menus)) : loop(menus)
+        },
+        menuPaths (state) {
+          function find (menus) {
+            const mp = []
+            menus.forEach((menu) => {
+              if (menu.linkType === '1') {
+                mp.push(menu.linkUrl)
+              }
+
+              if (menu.childrens) {
+                mp.push(...find(menu.childrens))
+              }
+            })
+            return mp
+          }
+          return find(state.menus)
         }
       }
     },
@@ -391,6 +415,34 @@ export const loader = (options = {}) => {
 
   // 如果有路由
   if (router) {
+    try {
+      router.beforeCreate = router.beforeCreate || []
+      router.mixins = router.mixins || []
+      router.mixins.push({
+        props: {
+          nvPage: {
+            type: Object,
+            default () {
+              return {}
+            }
+          }
+        },
+        created () {
+          console.log('hahahaha')
+        },
+        data () {
+          return {
+            page: {}
+          }
+        }
+      })
+      router.beforeCreate.push(function () {
+
+      })
+    } catch (e) {
+      console.log(router)
+    }
+    // console.log(router)
     // 如果router的render属性是函数， 则认为是vue组件
     if (typeof router.render === 'function') {
       // 如果申明为跟路由
@@ -444,6 +496,7 @@ function recursivelyProcessRoute (routes, { parent = '' } = {}) {
         { parent: `${parent}${router.path}` }
       )
     } else {
+      router.props = { right: true }
       nenv.flatRoutes.push({ path: router.path, component: router.component })
     }
   })
