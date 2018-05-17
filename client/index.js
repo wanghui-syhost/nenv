@@ -427,9 +427,6 @@ export const loader = (options = {}) => {
             }
           }
         },
-        created () {
-          console.log('hahahaha')
-        },
         data () {
           return {
             page: {}
