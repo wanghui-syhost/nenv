@@ -15,7 +15,7 @@ module.exports = class UnlinkFilePlugin {
 
       Promise.all(removed.map(async (f) => {
         console.log(compilation.outputPath, f)
-        const path = join(compilation.outputPath, f)
+        const path = join(compiler.outputPath, f)
         try {
           await unlink(path)
         } catch (err) {
