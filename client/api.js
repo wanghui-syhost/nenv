@@ -3,7 +3,10 @@ import unfetch from '../lib/unfetch'
 export function tokenLogin (params) {
   return unfetch({
     url: 'user/info',
-    method: 'get'
+    method: 'get',
+    params
+  }).then((res) => {
+    return res
   })
 }
 

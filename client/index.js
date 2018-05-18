@@ -5,7 +5,7 @@ import Vuex, { Store } from 'vuex'
 import ElementUI from 'element-ui'
 import Nprogress from 'nprogress'
 
-import 'element-ui/lib/theme-chalk/index.css'
+// import 'element-ui/lib/theme-chalk/index.css'
 import 'normalize.css/normalize.css'
 import '../styles/nenv.scss'
 
@@ -23,7 +23,7 @@ import App from './App'
 
 import '../lib/i18n'
 
-import { userLogin, userLogout, platformFetchMenus } from './api'
+import { userLogin, userLogout, platformFetchMenus, tokenLogin } from './api'
 // import utils from './utils'
 
 window.unfetch = unfetch
@@ -63,9 +63,10 @@ ElementUI.Dialog.props.width = {
   default: '65%'
 }
 
-// ElementUI.Dialog.props.appendToBody.default = true
-
-ElementUI.TableColumn.props.showOverflowTooltip.default = true
+ElementUI.TableColumn.props.showOverflowTooltip = {
+  type: Boolean,
+  default: true
+}
 
 ElementUI.Dialog.mixins.push({
   watch: {
@@ -138,7 +139,9 @@ nenv.raw.router = router
 
 const platformStorage = (new StorageBuilder('platform', {
   menus: Array,
-  layout: String
+  layout: String,
+  persmissons: JSON,
+  theme: JSON
 })).storage
 
 // 声明空store
@@ -160,7 +163,12 @@ const store = new Store({
         isHomeMenuShow: true,
         theme: {
           palette: {
-            primaryColor: 'blue'
+            ...Object.assign(
+              {
+                primaryColor: '#7B2DE3'
+              },
+              (platformStorage.theme || {}).palette
+            )
           },
           classes: {
 
@@ -170,9 +178,9 @@ const store = new Store({
         layout: platformStorage.layout,
         acitveMenu: {},
         activeTopMenu: {},
-        persmissons: {
+        persmissons: Object.assign({
           urls: {}
-        }
+        }, platformStorage.persmissons)
       },
       mutations: {
         ADD_LAYOUT: (state, layout) => {
@@ -197,13 +205,21 @@ const store = new Store({
         UPDATE_HOME_MENU: (state, isShow) => {
           state.isHomeMenuShow = isShow
         },
+        UPDATE_THEME: (state, { classes, palette }) => {
+          state.theme.palette = Object.assign(state.theme.palette, palette)
+          platformStorage.theme = state.theme
+        },
         ADD_PERMISSION_URL: (state, urls = []) => {
           if (!Array.isArray(urls)) {
             urls = [urls]
           }
           urls.forEach(url => {
-            state.persmissons.url.push(url)
+            let paths = {}
+            paths[url] = true
+            Object.assign(state.persmissons.urls, paths )
+            state.persmissons.urls[url] = true
           })
+          platformStorage.persmissons = state.persmissons
         }
       },
       actions: {
@@ -215,17 +231,15 @@ const store = new Store({
           function loop (menus, urls = []) {
             for (let menu of menus) {
               if (menu.linkUrl) {
-                urls.push(menus.linkUrl)
-              } else {
-  
+                urls.push(menu.linkUrl)
+              }
+              if (menu.childrens) {
+                loop(menu.childrens, urls)
               }
             }
-
             return urls
           }
-
-          // commit('ADD_PERMISSION_URL', loop(menus))
-
+          await commit('ADD_PERMISSION_URL', loop(menus))
           commit('UPDATE_MENUS', menus)
         },
         async enableHomeMenu ({ commit }, flag) {
@@ -244,20 +258,48 @@ const store = new Store({
           commit('CHANGE_LAYOUT', layout)
         },
         async theming ({ commit, state }, { classes, palette } = {}) {
-
+          commit('UPDATE_THEME', { classes, palette })
         },
         async logout ({ commit, state }) {
           platformStorage.$clear(true)
-          // commit('DELETE_MENUS')
         }
       },
       getters: {
         menus (state) {
+          function loop (menus) {
+            const filteredMenus = []
+            for (let menu of menus) {
+              if (menu.isShow !== false) {
+                if (menu.childrens) {
+                  menu.childrens = loop(menu.childrens)
+                }
+                filteredMenus.push(menu)
+              }
+            }
+            return filteredMenus
+          }
+          const menus = JSON.parse(JSON.stringify(state.menus))
           return state.isHomeMenuShow ? [{
             linkType: '1',
             linkUrl: '/home',
             menuName: '首页'
-          }].concat(state.menus) : state.menus
+          }].concat(loop(menus)) : loop(menus)
+        },
+        menuPaths (state) {
+          function find (menus) {
+            const mp = []
+            menus.forEach((menu) => {
+              if (menu.linkType === '1') {
+                mp.push(menu.linkUrl)
+              }
+
+              if (menu.childrens) {
+                mp.push(...find(menu.childrens))
+              }
+            })
+            return mp
+          }
+          return find(state.menus)
         }
       }
     },
@@ -298,7 +340,18 @@ const store = new Store({
         async logout ({ commit, dispatch }) {
           await userLogout()
           commit('DELETE_TOKEN')
-        }
+        }, 
+        async ssoLogin ({commit, dispatch}, credential) {
+          localStorage.removeItem('user.token')
+          const {user, homePath} = (await tokenLogin({'Authorization':credential.token})).data
+          await commit('UPDATE_TOKEN', credential.token)
+          await commit('UPDATE_PROFILE', user)
+          await commit('UPDATE_HOME', homePath)
+
+         let url = localStorage.getItem('unfetch.redirect')
+        //nenv.bus.$emit('ssoLogin')
+        window.location.href=url
+        },
       }
     }
   },
@@ -311,7 +364,11 @@ const store = new Store({
       await dispatch('user/logout')
       await dispatch('platform/logout')
       nenv.bus.$emit('on-logout')
-    }
+    },
+    async userInfo ({ commit, dispatch, state }, token) {
+      await dispatch('user/ssoLogin', { token: token })
+      await dispatch('platform/fetchMenus', { token: token })
+    },
   }
 })
 nenv.raw.store = store
@@ -358,6 +415,31 @@ export const loader = (options = {}) => {
 
   // 如果有路由
   if (router) {
+    try {
+      router.beforeCreate = router.beforeCreate || []
+      router.mixins = router.mixins || []
+      router.mixins.push({
+        props: {
+          nvPage: {
+            type: Object,
+            default () {
+              return {}
+            }
+          }
+        },
+        data () {
+          return {
+            page: {}
+          }
+        }
+      })
+      router.beforeCreate.push(function () {
+
+      })
+    } catch (e) {
+      console.log(router)
+    }
+    // console.log(router)
     // 如果router的render属性是函数， 则认为是vue组件
     if (typeof router.render === 'function') {
       // 如果申明为跟路由
@@ -411,6 +493,7 @@ function recursivelyProcessRoute (routes, { parent = '' } = {}) {
         { parent: `${parent}${router.path}` }
       )
     } else {
+      router.props = { right: true }
       nenv.flatRoutes.push({ path: router.path, component: router.component })
     }
   })
@@ -431,6 +514,17 @@ export const getLayout = (name) => {
     return getLayout(name)
   }
 }
+
+router.beforeEach((to, from, next) => {
+  const urls = store.state.platform.persmissons.urls
+  const { path, meta } = to
+  if (meta['nvPermission'] === false || urls[path]) {
+    next()
+  } else {
+    console.log(`url[${to.path}]被平台权限系统拦截`)
+    next('/err401')
+  }
+})
 
 export const mount = () => {
   const { raw, i18n } = nenv
