@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <link rel="icon" href="/static/favicon.ico" >
+        <link rel="icon" href="<%= htmlWebpackPlugin.options.assetPublicPath + 'static/favicon.ico' %>" >
         <meta name="viewport" content="width=device-width,initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" >
         <meta name = "renderer" content= "webkit">
@@ -28,7 +28,7 @@
         </div>
         <div id="nenv-appended-root"> </div>
 <% htmlWebpackPlugin.files.js.forEach(function(js) { %>
-    <% if(['/main.js', '/commons.js', '/manifest.js', '/bootstrap.js'].indexOf(js) > -1) { %>
+    <% if(['/main.js', '/commons.js', '/manifest.js', '/bootstrap.js'].indexOf(js.replace(htmlWebpackPlugin.options.assetPublicPath, '/')) > -1) { %>
         <script type="text/javascript" src="<%= js %>"></script>
     <% } %>
 <% })%>
