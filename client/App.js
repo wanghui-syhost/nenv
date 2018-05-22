@@ -38,7 +38,7 @@ export default {
       const self = this
       const { token } = self
       if (!token) {
-        //return self.$router.push(process.env.LOGIN_PATH || '/login')
+        return self.$router.push(process.env.LOGIN_PATH || '/login')
       }
     },
     activeMenus () {

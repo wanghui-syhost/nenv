@@ -19,6 +19,7 @@
                 }
             }
             checkBrowser()
+            window.nenvPageLoaderConfig = [<%= htmlWebpackPlugin.files.js.filter(i => /\/bundles\/pages/.exec(i)).map(i => `"${i}"`)%>]
         </script>
     </head>
     <body>
@@ -26,5 +27,10 @@
             <div id="nenv-loading"> </div>
         </div>
         <div id="nenv-appended-root"> </div>
+<% htmlWebpackPlugin.files.js.forEach(function(js) { %>
+    <% if(['/main.js', '/commons.js', '/manifest.js', '/bootstrap.js'].indexOf(js) > -1) { %>
+        <script type="text/javascript" src="<%= js %>"></script>
+    <% } %>
+<% })%>
     </body>
 </html>

@@ -1,7 +1,7 @@
 const { ConcatSource } = require('webpack-sources')
 const { IS_BUNDLED_PAGE, MATCH_ROUTE_NAME } = require('../../utils')
 
-class PageChunlTemplatePlugin {
+class PageChunkTemplatePlugin {
   apply (chunkTemplate) {
     chunkTemplate.plugin('render', function (modules, chunk) {
       if (!IS_BUNDLED_PAGE.test(chunk.name)) {
@@ -38,7 +38,7 @@ class PageChunlTemplatePlugin {
 module.exports = class PagesPlugin {
   apply (compiler) {
     compiler.plugin('compilation', (compilation) => {
-      compilation.chunkTemplate.apply(new PageChunlTemplatePlugin())
+      compilation.chunkTemplate.apply(new PageChunkTemplatePlugin())
     })
   }
 }

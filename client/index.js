@@ -4,8 +4,6 @@ import Router from 'vue-router'
 import Vuex, { Store } from 'vuex'
 import ElementUI from 'element-ui'
 import Nprogress from 'nprogress'
-
-// import 'element-ui/lib/theme-chalk/index.css'
 import 'normalize.css/normalize.css'
 import '../styles/nenv.scss'
 
@@ -82,7 +80,6 @@ ElementUI.Dialog.mixins.push({
     }
   }
 })
-
 Vue.use(ElementUI, {
   size: 'nenv'
 })
@@ -118,12 +115,13 @@ const nenv = {
   stores: {},
   flatRoutes: [],
   routes: [],
-  pageLoader: pageLoader,
+  pageLoader,
   i18n: null,
   lib: {
     StorageBuilder
   }
 }
+Vue.prototype.pageLoader = pageLoader
 Vue.prototype.project = nenv.project
 
 router.beforeEach((to, from, next) => {
@@ -216,7 +214,7 @@ const store = new Store({
           urls.forEach(url => {
             let paths = {}
             paths[url] = true
-            Object.assign(state.persmissons.urls, paths )
+            Object.assign(state.persmissons.urls, paths)
             state.persmissons.urls[url] = true
           })
           platformStorage.persmissons = state.persmissons
@@ -340,18 +338,18 @@ const store = new Store({
         async logout ({ commit, dispatch }) {
           await userLogout()
           commit('DELETE_TOKEN')
-        }, 
+        },
         async ssoLogin ({commit, dispatch}, credential) {
           localStorage.removeItem('user.token')
-          const {user, homePath} = (await tokenLogin({'Authorization':credential.token})).data
+          const {user, homePath} = (await tokenLogin({'Authorization': credential.token})).data
           await commit('UPDATE_TOKEN', credential.token)
           await commit('UPDATE_PROFILE', user)
           await commit('UPDATE_HOME', homePath)
 
-         let url = localStorage.getItem('unfetch.redirect')
-        //nenv.bus.$emit('ssoLogin')
-        window.location.href=url
-        },
+          let url = localStorage.getItem('unfetch.redirect')
+        // nenv.bus.$emit('ssoLogin')
+          window.location.href = url
+        }
       }
     }
   },
@@ -368,10 +366,40 @@ const store = new Store({
     async userInfo ({ commit, dispatch, state }, token) {
       await dispatch('user/ssoLogin', { token: token })
       await dispatch('platform/fetchMenus', { token: token })
-    },
+    }
   }
 })
 nenv.raw.store = store
+
+pageLoader.loadPage('/err404')
+
+// 异步加载
+router.beforeEach((to, from, next) => {
+  // 检测cache 在pageLoader的then里面有bug
+  if (nenv.pageLoader.pageCache[to.path]) {
+    return next()
+  }
+  const { path } = to
+  pageLoader.loadPage(path)
+  .then(() => {
+    return next(to.fullPath)
+  })
+  .catch(() => {
+    next()
+  })
+})
+
+// 权限系统
+router.beforeResolve((to, from, next) => {
+  const urls = store.state.platform.persmissons.urls
+  const { path, meta } = to
+  if (meta['nvPermission'] === false || urls[path]) {
+    next()
+  } else {
+    console.log(`url[${to.path}]被平台权限系统拦截`)
+    next('/err401')
+  }
+})
 
 export const loader = (options = {}) => {
   if (typeof options === 'function') {
@@ -470,8 +498,13 @@ export const loader = (options = {}) => {
     // window.__NENV_REGISTER_PAGE(router[0].path, router)
     // console.log(router)
     nenv.routes = nenv.routes.concat(router)
-    // nenv.flatRoutes = nenv.routes
     nenv.raw.router.addRoutes(router)
+    // 加入路由后才能触发
+    setTimeout(() => {
+      router.forEach(router => {
+        nenv.pageLoader.registerPage(router.path, () => { return {} })
+      })
+    })
   }
 }
 
@@ -514,17 +547,6 @@ export const getLayout = (name) => {
     return getLayout(name)
   }
 }
-
-router.beforeEach((to, from, next) => {
-  const urls = store.state.platform.persmissons.urls
-  const { path, meta } = to
-  if (meta['nvPermission'] === false || urls[path]) {
-    next()
-  } else {
-    console.log(`url[${to.path}]被平台权限系统拦截`)
-    next('/err401')
-  }
-})
 
 export const mount = () => {
   const { raw, i18n } = nenv

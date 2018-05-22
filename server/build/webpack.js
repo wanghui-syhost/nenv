@@ -142,11 +142,12 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
         assetPublicPath: '/',
         filename: 'index.html',
         template: join(__dirname, '../../client', 'app.ejs'), // 'index.html',
-        inject: true,
+        inject: false,
         chunksSortMode: function (chunk1, chunk2) {
           const order = [ 'main.js', 'commons', 'manifest' ]
           return order.indexOf(chunk2.names[0]) - order.indexOf(chunk1.names[0])
         }
+        // chunks: [ 'main.js', 'commons', 'manifest', 'bootstrap.js' ]
       })
     )
     if (!quiet) {
@@ -162,7 +163,7 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       filename: 'index.html',
       template: join(__dirname, '../../client', 'app.ejs'),
       // template: join(__dirname, 'clent') ,//'index.html',
-      inject: true,
+      inject: false,
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -229,9 +230,17 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
     mainBabelOptions.presets.push(require.resolve('./babel/preset'))
   }
 
-  const rules = (dev ? [...styleLoaders({
-    sourceMap: true
-  })] : [...styleLoaders({
+  const rules = (dev ? [
+    {
+      test: /\.(js|vue)(\?[^?]*)?$/,
+      loader: 'hot-self-accept-loader',
+      include: [
+        join(dir, 'pages')
+      ]
+    },
+    ...styleLoaders({
+      sourceMap: true})
+  ] : [...styleLoaders({
     extract: true
   })])
     .concat([
