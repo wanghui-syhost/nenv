@@ -90,14 +90,14 @@ export default {
         const value = colorMap[key]
         data = data.replace(new RegExp(key, 'ig'), value)
       })
-      return data
+      return data.replace('nenvPublicPath', window.nenvPublicPath)
     },
     getIndexStyle () {
       const self = this
       window.unfetch({
         method: 'GET',
         baseURL: '/',
-        url: '/static/theme-nenv/index.css',
+        url: `${window.nenvPublicPath}static/theme-nenv/index.css`,
         responseType: 'text'
       }).then(({data}) => {
         self.originalStyle = self.getStyleTemplate(data)

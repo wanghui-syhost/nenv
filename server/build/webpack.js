@@ -123,6 +123,9 @@ module.exports = async function createCompiler (dir, { dev = false, quiet = fals
       'process.env.NODE_ENV': JSON.stringify(dev ? 'development' : 'production')
     }),
     new webpack.DefinePlugin({
+      'process.env.assetPublicPath': JSON.stringify(config.assetPublicPath)
+    }),
+    new webpack.DefinePlugin({
       'process.env.VERSION': `'${pkg.version}'`
     }),
     new webpack.DefinePlugin({
