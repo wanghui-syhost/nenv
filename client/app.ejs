@@ -23,7 +23,6 @@
             }
             checkBrowser()
             window.nenvPageLoaderConfig = [<%= htmlWebpackPlugin.files.js.filter(i => /\/bundles\/pages/.exec(i)).map(i => `"${i}"`)%>]
-            window.nenvPublicPath = "<%= Object.keys(htmlWebpackPlugin.options) %>"
             window.nenvPublicPath = "<%= htmlWebpackPlugin.options.assetPublicPath%>"
         </script>
     </head>
