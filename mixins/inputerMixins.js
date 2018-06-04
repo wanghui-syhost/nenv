@@ -2,7 +2,7 @@ export default {
   props: {
     nvCode: {
       type: String,
-      required: true
+      //required: true
     },
     nvUrl: {
       type: String,
@@ -25,6 +25,9 @@ export default {
   methods: {
     fetchOptions () {
       const self = this
+      if (!self.nvCode) {
+        return console.warn("nv-Code not defined")
+      }
       window.unfetch({
         url: self.nvUrl,
         methods: 'get',
