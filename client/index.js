@@ -142,6 +142,12 @@ const platformStorage = (new StorageBuilder('platform', {
   theme: JSON
 })).storage
 
+const userStorage = (new StorageBuilder('user', {
+  home: String,
+  profile: JSON,
+  token: String
+})).storage
+
 // 声明空store
 const store = new Store({
   modules: {
@@ -184,7 +190,7 @@ const store = new Store({
         ADD_LAYOUT: (state, layout) => {
           state.layouts.push(layout)
         },
-        CHANGE_LAYOUT: (state, layout) => {
+        CHANGE_LAYOUT: (state, layout) => { 
           platformStorage.layout = layout
         },
         UPDATE_TITLE: (state, title) => {
@@ -305,9 +311,9 @@ const store = new Store({
     user: {
       namespaced: true,
       state: {
-        token: localStorage.getItem('user.token'),
-        home: localStorage.getItem('user.home'),
-        profile: JSON.parse(localStorage.getItem('user.profile') || '{}')
+        token: userStorage.token,
+        home: userStorage.home,
+        profile: userStorage.profile
       },
       mutations: {
         'DELETE_TOKEN': (state) => {
@@ -337,6 +343,7 @@ const store = new Store({
         },
         async logout ({ commit, dispatch }) {
           await userLogout()
+          userStorage.$clear(true)
           commit('DELETE_TOKEN')
         },
         async ssoLogin ({commit, dispatch}, credential) {
@@ -361,6 +368,9 @@ const store = new Store({
     async logout ({ commit, dispatch, state }) {
       await dispatch('user/logout')
       await dispatch('platform/logout')
+      if (process.env.SSO_URL) {
+        unfetch.ssoLogin()
+      } 
       nenv.bus.$emit('on-logout')
     },
     async userInfo ({ commit, dispatch, state }, token) {
@@ -502,7 +512,7 @@ export const loader = (options = {}) => {
     // 加入路由后才能触发
     setTimeout(() => {
       router.forEach(router => {
-        nenv.pageLoader.registerPage(router.path, () => { return {} })
+        nenv.pageLoader.registerPage(router.path, () => { return { page: router.component } })
       })
     })
   }
