@@ -38,5 +38,10 @@ export default {
         self.nvOptions = data
       })
     }
+  },
+  watch: {
+    nvCode () {
+      this.fetchOptions()
+    }
   }
 }
