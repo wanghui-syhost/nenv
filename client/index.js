@@ -221,6 +221,7 @@ const store = new Store({
             let paths = {}
             paths[url] = true
             Object.assign(state.persmissons.urls, paths)
+            url = url.replace(/\?.*$/g, '')
             state.persmissons.urls[url] = true
           })
           platformStorage.persmissons = state.persmissons
